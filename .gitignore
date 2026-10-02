@@ -1,0 +1,4 @@
+config.yaml
+*.local.*
+.DS_Store
+*.zip

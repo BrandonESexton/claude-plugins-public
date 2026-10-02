@@ -1,0 +1,7 @@
+{
+  "name": "transcript-processor",
+  "version": "0.2.0",
+  "description": "Turns meeting transcripts into 1:1 and team notes, action items, and urgent callouts in a Markdown team-management workspace.",
+  "author": { "name": "Brandon Sexton", "email": "bsexton@pm.me" },
+  "license": "MIT"
+}

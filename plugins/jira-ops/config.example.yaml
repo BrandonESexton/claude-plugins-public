@@ -1,0 +1,61 @@
+# jira-ops config
+# Copy to ~/.config/jira-ops/config.yaml and fill in.
+# Every skill reads this at the start of a run. If it is missing, the skill asks for the
+# values in one short interview and writes it. Field IDs differ per Jira site; if one is
+# blank or errors, the skill looks it up with a field-metadata call and offers to save it.
+
+jira:
+  site: "yourcompany.atlassian.net"
+  cloud_id: ""
+  project_key: "OPS"
+  board_name: "OPS board"
+  fields:
+    story_points: ""          # e.g. customfield_10016
+    epic_link: ""             # or leave blank if your site uses the parent field for epics
+    sprint: ""                # e.g. customfield_10020
+    approving_manager: ""     # user-picker, used by AI spend requests
+    architecture_approver: "" # optional, used by the sprint report
+  # Date the architecture approver field was created. Tickets last updated before it are
+  # not flagged for a missing sign-off.
+  architecture_approver_since: "2026-01-01"
+  max_story_points: 8
+
+grooming:
+  # Catch-all epic for tickets with no clear epic fit.
+  catch_all_epic: "OPS-100"
+  # Signature appended to every comment the groomer posts. Used to recognize its own
+  # comments on later runs, so keep it stable once set.
+  signature: "_Posted by backlog grooming. Reply or update the ticket to trigger re-review._"
+
+ai_spend:
+  # Epic that AI token or spend increase requests are parented to.
+  requests_epic: "OPS-200"
+  # Person who processes approved requests (Jira account ID).
+  processor_account_id: ""
+  points: 1
+  # Optional suggestions in the prompt-efficiency review.
+  alternative_tool_hint: "For bulk, low-reasoning text work (reformatting, transcription cleanup), an alternative assistant with a different usage model may be a better fit."
+  team_check_hints:
+    - match: "Salesforce"
+      hint: "Check with the Business Applications team first; they may already have a report or automation for this."
+
+sprint_report:
+  team_name: "Platform Engineering"
+  # People tracked in the per-person table, by Jira display name.
+  people:
+    - "Alex Rivera"
+    - "Sam Chen"
+    - "Priya Natarajan"
+  # Markdown file with a "Current Sprint" section listing each person's sprint goal.
+  goals_file: "~/team/sprint-goals.md"
+  # Markdown file with per-sprint points and an "Averages" table, one row per person.
+  velocity_file: "~/team/velocity-tracker.md"
+  hours_per_point: [1, 1.25]
+  # Keywords that mark a ticket as system-build work needing architecture sign-off,
+  # used only when no system-build label is present.
+  system_build_keywords: ["infra", "AWS", "IAM", "DNS", "Okta", "webhook", "load balancer", "access provisioning"]
+
+connectors:
+  # Optional: a tool gateway to search first for Jira operations before falling back to
+  # the native Atlassian connector.
+  prefer: ""

@@ -1,0 +1,7 @@
+{
+  "name": "catch-me-up",
+  "version": "0.1.0",
+  "description": "Personal cross-app 'what needs me right now' digest across Gmail, Slack, Jira, and other connected work apps, with per-person setup.",
+  "author": { "name": "Brandon Sexton", "email": "bsexton@pm.me" },
+  "license": "MIT"
+}

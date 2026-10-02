@@ -1,0 +1,87 @@
+# job-application config
+# Copy to ~/.config/job-application/config.yaml and fill in.
+# Every skill reads this at the start of a run. If it is missing, the skill runs a short
+# setup interview and writes it.
+
+candidate:
+  name: "Jane Doe"
+  # Your one source of truth for claims. Every resume line, cover letter story, and
+  # interview answer must trace to this file. Keep it honest and specific.
+  facts_file: "~/career/career.md"
+  # Optional. Format rules for resumes and letters (section order, title style, etc.).
+  standards_file: "~/career/resume-standards.md"
+
+search:
+  comp_floor_usd: 150000
+  # Anything here is a flag in every review.
+  hard_stops:
+    - "travel over 25%"
+    - "fully on-site"
+  target_roles:
+    - "IT Director"
+    - "Senior IT Engineering Manager"
+
+# Claims you must never make, or must make only a certain way. The build skill searches
+# every resume and letter for these before delivering. Write them as plain rules.
+claim_rules:
+  - "No bachelor's degree. Education is the associate degree only."
+  - "No total-career tenure counts like '25 years'."
+  - "Windows and Intune experience is from earlier employers only, never the current one."
+
+files:
+  # Where per-company notes, interview prep, and the story bank live.
+  notes_dir: "~/career/notes"
+  story_bank: "~/career/notes/story-bank.md"
+  # Document build. Each template is a script that takes an output .docx path as its only
+  # argument. The build skill copies it per company and edits content only.
+  resume_template: "~/career/templates/resume_template.js"
+  cover_letter_template: "~/career/templates/cover_letter_template.js"
+  resume_out_dir: "~/career/resumes"
+  cover_letter_out_dir: "~/career/cover_letters"
+  resume_pages: 2
+  cover_letter_pages: 1
+
+tracker:
+  # Google Sheet ID (the long string in the sheet URL).
+  sheet_id: ""
+  tab: "Tracker"
+  passed_tab: "Passed On"
+  # Column letters for each field. Columns marked formula are never written.
+  columns:
+    company: A
+    role: B
+    type: C            # Leadership, IC, or Hybrid
+    work_mode: D
+    status: E
+    date: F            # text like "Sep 28"
+    fit: G
+    impact: H
+    combined: I        # formula
+    posted_low: J
+    posted_high: K
+    range_notes: L
+    expectation: M     # what you entered or said about salary
+    floor_label: N     # formula or label: Clears, Top of band only, Below floor, No band
+    link: O
+    notes_file: P
+    next_step: Q
+  statuses:
+    built: "Resume built (confirm submitted)"
+    applied: "Applied"
+    recruiter: "Recruiter call only"
+    interviewing: "Interviewing"
+    rejected: "Rejected"
+    closed: "Closed (no response)"
+    withdrew: "Withdrew"
+
+followup:
+  applied_first_days: 7
+  applied_repeat_days: 7
+  applied_max: 2
+  interview_repeat_business_days: 3
+
+style:
+  # Optional: name of a writing-voice skill to run drafts through.
+  voice_skill: ""
+  # Extra phrases to ban on top of the built-in list.
+  banned_phrases: []

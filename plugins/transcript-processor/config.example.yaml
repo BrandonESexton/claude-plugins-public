@@ -1,0 +1,42 @@
+# transcript-processor config
+# Copy to ~/.config/transcript-processor/config.yaml and fill in.
+# If missing, the skill asks for these values once and writes the file.
+
+manager_name: "Jordan Lee"
+
+# Root folder of your team-management notes. All file paths below are relative to it.
+workspace: "~/team-management"
+
+teams:
+  - name: "Platform"
+    team_file: "platform/platform-team.md"           # priorities, health, open risks, wins
+    meeting_log: "platform/platform-meeting-log.md"  # dated group meeting entries
+    members:
+      - name: "Alex Rivera"
+        one_on_one_file: "platform/alex-1on1.md"
+      - name: "Sam Chen"
+        one_on_one_file: "platform/sam-1on1.md"
+    # Meeting titles containing any of these route to this team's meeting log.
+    meeting_topics: ["Platform Standup", "Platform Weekly"]
+
+# Stakeholders (your manager, peers, partners). Their meetings go to one playbook file,
+# under a "My Relationship with <name>" section, or under the general section if none fits.
+stakeholders:
+  playbook_file: "management-playbook.md"
+  general_section: "Navigating the Landscape"
+  people: ["Morgan Patel", "Chris Okafor"]
+
+# Teams you work with but do not manage. Their content is noted as a cross-team
+# dependency, never filed as a managed report.
+reference_only_teams: ["Data Engineering"]
+
+# Rules from your team's own working agreements that the skill should flag.
+flag_rules:
+  - "Any cross-team request touching production or security needs a ticket. Flag one that does not have one."
+  - "Describe project progress by phase and goal, never by percent of tickets closed."
+
+# Optional integrations. Leave blank to skip.
+transcript_fetcher_skill: ""   # a skill that fetches a transcript by meeting or note ID
+fetch_cache_dir: ""            # where that skill writes transcripts; cleaned up after use
+calendar_lookup: true          # find a meeting's ID from your calendar when only a name is given
+task_app: ""                   # e.g. "Things3", "Todoist"; your own action items can go there

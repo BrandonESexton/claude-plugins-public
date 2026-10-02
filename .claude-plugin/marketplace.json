@@ -1,0 +1,10 @@
+{
+  "name": "claude-plugins-public",
+  "owner": { "name": "Brandon Sexton", "email": "bsexton@pm.me" },
+  "plugins": [
+    { "name": "job-application", "source": "./plugins/job-application", "description": "Job posting review, tailored resume and cover letter, tracker, interview prep, and follow-ups." },
+    { "name": "jira-ops", "source": "./plugins/jira-ops", "description": "Backlog grooming against a Definition of Ready, AI spend-increase governance, and sprint reports." },
+    { "name": "catch-me-up", "source": "./plugins/catch-me-up", "description": "Cross-app triage of what needs you across email, Slack, Jira, and more." },
+    { "name": "transcript-processor", "source": "./plugins/transcript-processor", "description": "Turns meeting transcripts into 1:1 and team notes, action items, and callouts." }
+  ]
+}

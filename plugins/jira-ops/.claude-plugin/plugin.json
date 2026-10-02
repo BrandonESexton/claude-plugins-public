@@ -1,0 +1,7 @@
+{
+  "name": "jira-ops",
+  "version": "1.0.0",
+  "description": "Grooms Jira backlog tickets against a Definition of Ready, gates AI token-increase requests on evidence and a prompt-efficiency review, applies approved spend changes with a human in the loop, and reports sprint health against each person's own baseline.",
+  "author": { "name": "Brandon Sexton", "email": "bsexton@pm.me" },
+  "license": "MIT"
+}

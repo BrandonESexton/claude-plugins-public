@@ -1,6 +1,6 @@
 {
   "name": "job-application",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Reviews a job posting with honest fit feedback, builds the tailored resume and cover letter, records the application in a Google Sheet tracker, preps for interviews, and handles follow-ups.",
   "author": { "name": "Brandon Sexton", "email": "bsexton@pm.me" },
   "license": "MIT"

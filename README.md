@@ -1,8 +1,8 @@
 # Claude plugins for IT and engineering leaders
 
-Four Claude plugins I built and used day to day: running a job search, grooming a Jira backlog and governing AI spend, triaging what needs me across email, Slack and Jira, and turning meeting transcripts into notes and action items.
+Five Claude plugins I built and used day to day: running a job search, grooming a Jira backlog and governing AI spend, triaging what needs me across email, Slack and Jira, turning meeting transcripts into notes and action items, and making architecture decisions that hold up to review.
 
-They are written as Claude skills (Markdown instructions plus a small config file), so they run in Claude Code or Claude Cowork without any code to deploy.
+They are written as Claude skills (Markdown instructions plus a small config file), so they run in Claude Code or Claude Cowork without any code to deploy. The exception is architect-toolkit, which ships small stdlib-only Python scripts so scoring and scanning are reproducible.
 
 | Plugin | What it does |
 |---|---|
@@ -10,6 +10,7 @@ They are written as Claude skills (Markdown instructions plus a small config fil
 | [jira-ops](plugins/jira-ops) | Grooms backlog tickets against a Definition of Ready, gates AI token-increase requests on evidence and a prompt-efficiency review, applies approved spend changes with a human in the loop, and reports sprint health against each person's own baseline. |
 | [catch-me-up](plugins/catch-me-up) | One pass over Gmail, Slack, Jira, and other connected apps that reports only what actually needs you, sorted Critical or Important. Per-person setup. |
 | [transcript-processor](plugins/transcript-processor) | Takes a meeting transcript, routes it to the right 1:1 or team file, writes the summary and action items, and flags issues showing up across more than one person. |
+| [architect-toolkit](plugins/architect-toolkit) | Interviews you through an architecture decision, scores options with a reason for every score, stress-tests the winner with sensitivity analysis, runs an adversarial pre-mortem, and reviews Terraform and CloudFormation into an HTML report with evidence for every finding. |
 
 ## Design choices that run through all of them
 
@@ -22,6 +23,7 @@ These matter more than the prompts themselves, and they came from things going w
 - **Idempotent automation.** The backlog groomer signs its own comments and skips tickets with no new activity since its last pass, so a recurring run never spams the same ticket.
 - **Never trust a cached ID.** Jira transition IDs differ by issue type and workflow, and `openSprints()` matches future sprints as well as the active one. The skills look these up live each run.
 - **Cost is a feature.** The sprint report started as a ~330K-token, 57-call run. Batching, field trimming, and a cheaper mode for narrow questions brought it down sharply. Depth matches the question.
+- **Math is code, judgment is Claude.** Where a result should be reproducible (decision scoring, IaC scanning), a script computes it and Claude explains it. A decision that flips under a 30% weight change is reported as fragile, not as a winner.
 - **Honest output beats a full report.** Empty sections are omitted, not padded. "Not enough signal" is a valid answer and beats a fabricated one.
 
 ## Install

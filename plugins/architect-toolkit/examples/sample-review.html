@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sample Infra Review</title><style>
+:root{--bg:#fff;--fg:#1a1d21;--mut:#5f6b7a;--card:#f5f7fa;--bd:#dde2e8;--r:#c62828;--o:#e65100;--y:#b58900;--b:#1565c0;--g:#2e7d32}
+@media(prefers-color-scheme:dark){:root{--bg:#12151a;--fg:#e8ecf1;--mut:#9aa7b5;--card:#1b2028;--bd:#2c3440;--r:#ef5350;--o:#ff9800;--y:#e0b400;--b:#64b5f6;--g:#66bb6a}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans-serif}
+main{max-width:880px;margin:0 auto;padding:24px 16px}h1{margin:0 0 4px}h2{margin-top:32px}
+.chip{display:inline-block;padding:2px 10px;border-radius:12px;margin:0 6px 6px 0;font-weight:600;font-size:13px;border:1px solid var(--bd)}
+.critical{--c:var(--r)}.high{--c:var(--o)}.medium{--c:var(--y)}.low{--c:var(--b)}.info{--c:var(--mut)}
+.chip{color:var(--c)}.row{display:grid;grid-template-columns:190px 1fr 36px;gap:10px;align-items:center;margin:6px 0}
+.bar{background:var(--card);border:1px solid var(--bd);height:12px;border-radius:6px;overflow:hidden}.bar i{display:block;height:100%}
+.g{background:var(--g)}.y{background:var(--y)}.r{background:var(--r)}
+.card{background:var(--card);border:1px solid var(--bd);border-left:4px solid var(--c);border-radius:6px;margin:8px 0;padding:8px 12px}
+summary{cursor:pointer;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}summary em{color:var(--mut);font-size:13px;margin-left:auto}
+.tag{color:var(--c);font-weight:700;font-size:12px;text-transform:uppercase}pre{overflow-x:auto;background:var(--bg);padding:8px;border-radius:4px;border:1px solid var(--bd)}
+.src{color:var(--mut);font-size:12px}table{border-collapse:collapse}td{padding:2px 14px 2px 0}
+@media(max-width:560px){.row{grid-template-columns:120px 1fr 30px}}
+</style><main><h1>Sample Infra Review</h1><p style="color:var(--mut)">17 findings. Scanner results are heuristic; High and Critical items should be confirmed in code.</p>
+<div><span class="chip critical">Critical 3</span><span class="chip high">High 2</span><span class="chip medium">Medium 7</span><span class="chip low">Low 5</span><span class="chip info">Info 0</span></div><h2>Pillar health</h2><div class="row"><span>Security</span><div class="bar"><i style="width:0%" class="r"></i></div><b>0</b></div><div class="row"><span>Reliability</span><div class="bar"><i style="width:68%" class="y"></i></div><b>68</b></div><div class="row"><span>Operational Excellence</span><div class="bar"><i style="width:88%" class="g"></i></div><b>88</b></div><div class="row"><span>Performance Efficiency</span><div class="bar"><i style="width:100%" class="g"></i></div><b>100</b></div><div class="row"><span>Cost Optimization</span><div class="bar"><i style="width:100%" class="g"></i></div><b>100</b></div><div class="row"><span>Sustainability</span><div class="bar"><i style="width:100%" class="g"></i></div><b>100</b></div><h2>Findings</h2><details class="card critical"><summary><span class="tag">Critical</span>
+<b>Admin or database port open to the internet</b><em>Security / SEC-SG-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:7 (aws_security_group.web)</p>
+<pre>cidr_blocks = [&quot;0.0.0.0/0&quot;]</pre>
+<p><strong>Fix:</strong> Restrict to known CIDRs, use SSM Session Manager instead of SSH/RDP, keep data stores private.</p>
+<p class="src">Source: scanner</p></details><details class="card critical"><summary><span class="tag">Critical</span>
+<b>Database is publicly accessible</b><em>Security / SEC-RDS-002</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:25 (aws_db_instance.orders)</p>
+<pre>publicly_accessible = true</pre>
+<p><strong>Fix:</strong> Set publicly_accessible = false and place in private subnets.</p>
+<p class="src">Source: scanner</p></details><details class="card critical"><summary><span class="tag">Critical</span>
+<b>IAM policy grants all actions on all resources</b><em>Security / SEC-IAM-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:37 (aws_iam_policy.admin)</p>
+<pre>&quot;Action&quot; : &quot;*&quot;</pre>
+<p><strong>Fix:</strong> Scope to required actions and resource ARNs.</p>
+<p class="src">Source: scanner</p></details><details class="card high"><summary><span class="tag">High</span>
+<b>S3 bucket has a public ACL</b><em>Security / SEC-S3-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:19 (aws_s3_bucket.logs)</p>
+<pre>acl    = &quot;public-read&quot;</pre>
+<p><strong>Fix:</strong> Use private ACL and add aws_s3_bucket_public_access_block.</p>
+<p class="src">Source: scanner</p></details><details class="card high"><summary><span class="tag">High</span>
+<b>Database storage not encrypted</b><em>Security / SEC-RDS-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:26 (aws_db_instance.orders)</p>
+<pre>storage_encrypted   = false</pre>
+<p><strong>Fix:</strong> Set storage_encrypted = true with a KMS key.</p>
+<p class="src">Source: scanner</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>Ingress open to 0.0.0.0/0</b><em>Security / SEC-SG-002</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:13 (aws_security_group.web)</p>
+<pre>cidr_blocks = [&quot;0.0.0.0/0&quot;]</pre>
+<p><strong>Fix:</strong> Confirm this is an intended public endpoint, ideally behind a load balancer or WAF.</p>
+<p class="src">Source: scanner</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>No S3 public access block defined in scanned code</b><em>Security / SEC-S3-002</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:17 (aws_s3_bucket.logs)</p>
+
+<p><strong>Fix:</strong> Add aws_s3_bucket_public_access_block with all four flags true, or enforce at account level.</p>
+<p class="src">Source: scanner</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>No explicit S3 encryption configuration</b><em>Security / SEC-S3-003</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:17 (aws_s3_bucket.logs)</p>
+
+<p><strong>Fix:</strong> Add SSE-KMS with a customer-managed key for sensitive data.</p>
+<p class="src">Source: scanner</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>RDS instance is single-AZ</b><em>Reliability / REL-RDS-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:22 (aws_db_instance.orders)</p>
+
+<p><strong>Fix:</strong> Set multi_az = true for production workloads.</p>
+<p class="src">Source: scanner</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>Automated backups disabled or unset</b><em>Reliability / REL-RDS-002</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:22 (aws_db_instance.orders)</p>
+
+<p><strong>Fix:</strong> Set backup_retention_period to 7 or more days.</p>
+<p class="src">Source: scanner</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>IMDSv2 not enforced</b><em>Security / SEC-EC2-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:29 (aws_instance.app)</p>
+
+<p><strong>Fix:</strong> Add metadata_options { http_tokens = &quot;required&quot; }.</p>
+<p class="src">Source: scanner</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>Instance gets a public IP</b><em>Security / SEC-EC2-002</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:32 (aws_instance.app)</p>
+<pre>associate_public_ip_address = true</pre>
+<p><strong>Fix:</strong> Place behind a load balancer; use SSM for access.</p>
+<p class="src">Source: scanner</p></details><details class="card low"><summary><span class="tag">Low</span>
+<b>No S3 versioning configured in scanned code</b><em>Reliability / REL-S3-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:17 (aws_s3_bucket.logs)</p>
+
+<p><strong>Fix:</strong> Enable versioning on buckets holding state or irreplaceable data.</p>
+<p class="src">Source: scanner</p></details><details class="card low"><summary><span class="tag">Low</span>
+<b>Resource has no tags</b><em>Operational Excellence / OPS-TAG-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:17 (aws_s3_bucket.logs)</p>
+
+<p><strong>Fix:</strong> Apply a tagging standard (owner, env, cost-center) or default_tags.</p>
+<p class="src">Source: scanner</p></details><details class="card low"><summary><span class="tag">Low</span>
+<b>Deletion protection not enabled</b><em>Reliability / REL-RDS-003</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:22 (aws_db_instance.orders)</p>
+
+<p><strong>Fix:</strong> Set deletion_protection = true for production.</p>
+<p class="src">Source: scanner</p></details><details class="card low"><summary><span class="tag">Low</span>
+<b>Resource has no tags</b><em>Operational Excellence / OPS-TAG-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:22 (aws_db_instance.orders)</p>
+
+<p><strong>Fix:</strong> Apply a tagging standard (owner, env, cost-center) or default_tags.</p>
+<p class="src">Source: scanner</p></details><details class="card low"><summary><span class="tag">Low</span>
+<b>Resource has no tags</b><em>Operational Excellence / OPS-TAG-001</em></summary>
+<p><strong>Where:</strong> examples/sample-infra/main.tf:29 (aws_instance.app)</p>
+
+<p><strong>Fix:</strong> Apply a tagging standard (owner, env, cost-center) or default_tags.</p>
+<p class="src">Source: scanner</p></details>
+<h2>Resource inventory</h2><table><tr><td>aws_security_group</td><td>1</td></tr><tr><td>aws_s3_bucket</td><td>1</td></tr><tr><td>aws_db_instance</td><td>1</td></tr><tr><td>aws_instance</td><td>1</td></tr><tr><td>aws_iam_policy</td><td>1</td></tr></table></main></html>

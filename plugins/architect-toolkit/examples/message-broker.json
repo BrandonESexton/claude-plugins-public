@@ -1,0 +1,30 @@
+{
+  "decision": "Message broker for order events",
+  "criteria": [
+    {"name": "Operational burden (ease)", "weight": 9},
+    {"name": "Total cost (3 yr)", "weight": 6},
+    {"name": "Team skill fit", "weight": 7},
+    {"name": "Throughput headroom", "weight": 5},
+    {"name": "Lock-in / exit cost", "weight": 4}
+  ],
+  "options": [
+    {"name": "Amazon SQS + SNS", "scores": {
+      "Operational burden (ease)": {"score": 5, "why": "Fully managed, no patching or capacity planning"},
+      "Total cost (3 yr)": {"score": 4, "why": "Per-request pricing, low at expected volume", "assumed": true},
+      "Team skill fit": {"score": 4, "why": "Team already runs Lambda consumers"},
+      "Throughput headroom": {"score": 4, "why": "Standard queues effectively unlimited throughput"},
+      "Lock-in / exit cost": {"score": 2, "why": "AWS-proprietary APIs"}}},
+    {"name": "Amazon MSK (Kafka)", "scores": {
+      "Operational burden (ease)": {"score": 2, "why": "Broker sizing, partitions, upgrades"},
+      "Total cost (3 yr)": {"score": 2, "why": "Always-on brokers, minimum 3 AZ footprint"},
+      "Team skill fit": {"score": 2, "why": "No Kafka experience on team"},
+      "Throughput headroom": {"score": 5, "why": "Designed for very high throughput and replay"},
+      "Lock-in / exit cost": {"score": 4, "why": "Open Kafka protocol, portable"}}},
+    {"name": "Defer (keep DB polling)", "scores": {
+      "Operational burden (ease)": {"score": 3, "why": "No new component"},
+      "Total cost (3 yr)": {"score": 3, "why": "No new spend, rising DB load", "assumed": true},
+      "Team skill fit": {"score": 5, "why": "Already in place"},
+      "Throughput headroom": {"score": 1, "why": "Polling collapses past current peak"},
+      "Lock-in / exit cost": {"score": 5, "why": "None added"}}}
+  ]
+}

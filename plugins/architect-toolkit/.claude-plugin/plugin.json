@@ -1,0 +1,6 @@
+{
+  "name": "architect-toolkit",
+  "version": "0.1.0",
+  "description": "Architecture decision records with weighted scoring, sensitivity analysis, and an adversarial pre-mortem, plus a Well-Architected style review of Terraform, CloudFormation, and CDK with evidence-backed findings and an HTML report.",
+  "author": { "name": "Brandon Sexton", "email": "bsexton@pm.me" }
+}

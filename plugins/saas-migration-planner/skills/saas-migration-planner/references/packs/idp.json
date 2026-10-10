@@ -1,0 +1,94 @@
+{
+  "id": "idp",
+  "title": "Identity provider migration",
+  "summary": "Moving workforce authentication and provisioning between identity providers (for example Entra ID to Okta, or Okta to Entra ID). The directory, the apps, and the devices all depend on it, so the inventory of connections is the plan.",
+  "types": {
+    "saml_sso": {"label": "SAML SSO app", "base_risk": 10, "effort_days": 0.5, "sequence": 2,
+      "checks": ["NameID format and attribute mapping preserved per app (UPN vs email breaks account linking)", "Vendor supports swapping IdP metadata, entity ID, and signing certificate", "Test login with pilot users before flipping"]},
+    "oidc_sso": {"label": "OIDC / OAuth SSO app", "base_risk": 12, "effort_days": 0.75, "sequence": 2,
+      "checks": ["Client ID/secret and redirect URIs re-registered in target", "Claims and scopes mapped (groups, email, sub identifier stays stable)", "Token lifetime and refresh behavior compared"]},
+    "scim_provisioning": {"label": "SCIM / automated provisioning", "base_risk": 20, "effort_days": 1.5, "sequence": 3,
+      "checks": ["Import and match existing app accounts BEFORE enabling push to avoid duplicates or mass deactivation", "Only one system may provision an app at a time: schedule the handoff", "Attribute and role mapping verified on a test user"]},
+    "m365_federation": {"label": "Microsoft 365 / domain federation", "base_risk": 25, "effort_days": 4, "sequence": 9,
+      "checks": ["Entra tenant remains the Microsoft 365 directory; scope is the authentication handoff, not deletion", "Federation flip affects whole domains: use a staged approach or test domain", "Hybrid join, Seamless SSO, and mail client modern auth tested"]},
+    "conditional_access": {"label": "Conditional access / auth policy", "base_risk": 20, "effort_days": 2, "sequence": 4,
+      "checks": ["Each policy exported and mapped to a target authentication policy, with gaps listed", "Named locations, risk signals, and device conditions reproduced or consciously dropped", "Report-only or audit mode before enforcement"]},
+    "mfa_authenticators": {"label": "MFA factors and passkeys", "base_risk": 18, "effort_days": 3, "sequence": 5,
+      "checks": ["Factors cannot be exported: plan re-enrollment campaign and helpdesk surge", "FIDO2 keys and passkeys re-registered", "Enrollment grace period and recovery path defined"]},
+    "device_trust": {"label": "Device trust / compliance signal", "base_risk": 20, "effort_days": 3, "sequence": 6,
+      "checks": ["Compliance signal source (MDM) connected to the target IdP", "Unmanaged device behavior decided", "Hybrid-joined or Entra-joined Windows login behavior left unchanged in early waves"]},
+    "service_principal_api": {"label": "Service principal / API / M2M auth", "base_risk": 22, "effort_days": 2, "sequence": 3,
+      "checks": ["Owner identified for each app registration or service account", "Secrets and certificates rotated into target, expiry dates recorded", "Graph or directory API consumers re-pointed"]},
+    "legacy_auth": {"label": "Legacy / header-based / LDAP / RADIUS", "base_risk": 24, "effort_days": 4, "sequence": 7,
+      "checks": ["Decide replace, proxy (access gateway), or retire", "LDAP/RADIUS interface stood up in target and tested", "Network path and shared secrets re-issued"]},
+    "privileged_admin": {"label": "Admin / privileged access", "base_risk": 22, "effort_days": 1.5, "sequence": 8,
+      "checks": ["Break-glass accounts remain outside the new IdP dependency", "Admin role assignments reviewed, not copied blindly", "Approval and PIM-style workflows replaced or documented"]},
+    "guest_b2b": {"label": "Guest / external identities", "base_risk": 14, "effort_days": 1.5, "sequence": 6,
+      "checks": ["External user population counted and owners assigned", "Invitation and trust model decided", "Partner apps that trust the old tenant notified"]},
+    "group_directory": {"label": "Groups / directory sync", "base_risk": 16, "effort_days": 2, "sequence": 1,
+      "checks": ["Nested and dynamic groups flattened or rebuilt as rules", "Source of truth for groups decided (HRIS, directory, or IdP)", "Group-based license and app assignment mapped"]}
+  },
+  "gotchas": [
+    {"title": "Passwords cannot be exported", "detail": "Hashes do not move between IdPs. Plan delegated authentication against on-prem AD, a staged password reset, or passwordless enrollment before the cutover, and budget helpdesk volume for it.", "severity": "High"},
+    {"title": "Two provisioners fighting over one app", "detail": "If both IdPs push SCIM to the same app, one can deprovision accounts the other just created. Hand off one app at a time and import-match first.", "severity": "Critical"},
+    {"title": "The old tenant does not disappear", "detail": "Organizations on Microsoft 365 keep the Entra tenant as the Microsoft directory. The project replaces the primary authentication and app-access layer, and the scope must say so to avoid a false decommission date.", "severity": "High"},
+    {"title": "Group nesting and dynamic rules do not port", "detail": "Target group models may be flat. Nested membership that granted app access silently stops working after migration.", "severity": "High"},
+    {"title": "New single point of failure", "detail": "Everything now authenticates through one vendor. Keep break-glass admin paths that do not depend on the new IdP and document the outage runbook.", "severity": "High"},
+    {"title": "Audit trail discontinuity", "detail": "Sign-in logs live in two places during transition. Keep old logs for the retention period and route the new ones to the SIEM before first cutover; SOC 2 evidence spans both.", "severity": "Medium"},
+    {"title": "Verify vendor behavior", "detail": "Feature gaps and limits change by release. Confirm each Critical and High item against current vendor documentation before committing dates.", "severity": "Info"}
+  ],
+  "pair_gotchas": {
+    "entra>okta": [
+      {"title": "NameID default differs", "detail": "Entra commonly emits UPN while Okta defaults to email. Apps keyed on the old value create duplicate users or lock people out. Record the format per app.", "severity": "High"},
+      {"title": "Conditional Access has no 1:1 export", "detail": "Policies must be re-expressed as Okta authentication policies and Device Assurance rules. Inventory every policy and list what is dropped.", "severity": "High"},
+      {"title": "Windows sign-in and join state", "detail": "Entra-joined or hybrid-joined devices keep their join. Replacing Windows login with an Okta device-access product is a separate decision, so defer it from the first waves.", "severity": "Medium"},
+      {"title": "App registrations used by automation", "detail": "Graph API consumers, scripts, and CI pipelines use Entra app registrations that have no Okta equivalent and break silently.", "severity": "High"}
+    ],
+    "okta>entra": [
+      {"title": "Okta groups and rules to Entra dynamic groups", "detail": "Okta group rules and app assignments map to Entra groups and enterprise app assignments with different evaluation behavior and licensing needs.", "severity": "High"},
+      {"title": "Okta Workflows and inline hooks", "detail": "Automations built in Okta Workflows or hooks have no direct Entra counterpart and must be rebuilt (Logic Apps, Power Automate, or custom).", "severity": "High"},
+      {"title": "Entra license tier gates features", "detail": "Conditional Access, PIM, and some provisioning features depend on license tier. Confirm licensing before the design is final.", "severity": "Medium"}
+    ]
+  },
+  "discovery": [
+    "Entra: export Enterprise Applications and App Registrations (portal CSV or Graph) with SSO type, assigned users, and last sign-in",
+    "Entra: pull 90 days of sign-in logs by application to find real usage and dead apps",
+    "Entra: export all Conditional Access policies, named locations, and authentication methods policy",
+    "Okta: export Applications, Groups, Group Rules, Policies, and System Log activity by app",
+    "Ask app owners and Finance (SaaS spend list) for apps that never touched the IdP",
+    "Search code and CI for client secrets, tenant IDs, and issuer URLs"
+  ],
+  "phases": [
+    {"name": "Discover and decide", "activities": ["Build the integration inventory", "Retire dead apps before migrating them", "Decide MFA, device trust, and provisioning source-of-truth approach", "Record decisions as ADRs"]},
+    {"name": "Build and mirror", "activities": ["Stand up target IdP, directory sync, and policies", "Configure break-glass and logging to SIEM", "Mirror group structure and test with IT pilot"]},
+    {"name": "Migrate in waves", "activities": ["Run waves in the order generated", "Hold a go/no-go before each wave", "Hypercare after every wave"]},
+    {"name": "Converge and retire", "activities": ["Remove old SSO trust and secrets per app", "Close old provisioning connectors", "Archive logs and update runbooks and audit evidence"]}
+  ],
+  "cutover_checklist": [
+    "Go/no-go signed by wave owner and security",
+    "Pilot users confirmed working on the target before broad switch",
+    "App vendor contacted where IdP swap needs vendor action",
+    "Helpdesk briefed with a one-page FAQ and escalation path",
+    "Break-glass admin login verified outside the new IdP",
+    "Old IdP configuration exported and saved before any change",
+    "Monitoring on sign-in failure rate with an agreed rollback threshold"
+  ],
+  "rollback": [
+    "Per app: restore previous IdP metadata and certificate (kept from the pre-change export)",
+    "Per app: re-enable old provisioning only after disabling the new connector",
+    "Domain federation: documented revert command and who may run it",
+    "Rollback trigger: sign-in failure rate or helpdesk ticket threshold agreed in advance"
+  ],
+  "exit_criteria": [
+    "Zero sign-ins to the old IdP for 30 days except break-glass",
+    "All provisioning owned by a single system",
+    "MFA enrollment at target percentage with recovery tested",
+    "Audit evidence reviewed by the security/compliance owner"
+  ],
+  "stakeholders": ["Security", "IT / Helpdesk", "App owners", "HR (source of truth)", "Compliance / audit", "Executive sponsor"],
+  "decisions": [
+    {"title": "Provisioning source of truth", "options": ["HRIS drives IdP", "IdP drives apps from directory", "Hybrid with explicit field ownership"]},
+    {"title": "Cutover model", "options": ["App-by-app phased", "Group-by-group phased", "Big bang by domain"]},
+    {"title": "Device trust approach", "options": ["MDM compliance signal", "IdP-native device assurance", "Defer to phase 2"]}
+  ]
+}

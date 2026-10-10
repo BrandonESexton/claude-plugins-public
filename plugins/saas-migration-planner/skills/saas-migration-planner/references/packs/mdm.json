@@ -1,0 +1,98 @@
+{
+  "id": "mdm",
+  "title": "MDM migration (Apple fleet)",
+  "summary": "Moving managed Apple devices between MDM platforms (for example Jamf Pro to Kandji, or the reverse). A device has one MDM enrollment at a time, so the risk is the gap between old management ending and new management taking hold: lost profiles, escrowed keys, certificates, and security agents.",
+  "types": {
+    "configuration_profile": {"label": "Configuration profiles and restrictions", "base_risk": 14, "effort_days": 3, "sequence": 3,
+      "checks": ["Each profile mapped to a target library item or custom profile, with payload gaps listed", "PPPC, system extension, and notification payloads recreated with correct team IDs", "Profiles installed immediately on enrollment, not in a later cycle"]},
+    "wifi_vpn_cert": {"label": "Wi-Fi, VPN, and certificates", "base_risk": 24, "effort_days": 4, "sequence": 1,
+      "checks": ["Network and certificate profiles delivered first so devices do not lose connectivity", "SCEP/ACME certificates bound to the old MDM are reissued before removal", "802.1X EAP-TLS tested end to end with a migrated device"]},
+    "security_agent": {"label": "EDR / security agents", "base_risk": 22, "effort_days": 2.5, "sequence": 2,
+      "checks": ["Full Disk Access, system extension, and network extension approvals deployed with the agent vendor's current profile", "Agent healthy and reporting after enrollment", "Security team confirms no coverage gap during the swap"]},
+    "filevault_escrow": {"label": "FileVault recovery key / bootstrap token escrow", "base_risk": 25, "effort_days": 3, "sequence": 4,
+      "checks": ["Recovery keys rotated and escrowed in the target BEFORE the old MDM is removed", "Bootstrap token escrowed in the target", "Recovery tested on a pilot device"]},
+    "ade_enrollment": {"label": "Automated Device Enrollment (ABM) assignment", "base_risk": 22, "effort_days": 3, "sequence": 5,
+      "checks": ["Device assignment moved to the new MDM server in Apple Business Manager at the right moment", "Supervision state and enrollment method per device model recorded", "Non-ADE or user-enrolled devices handled with a user-driven path"]},
+    "app_deployment": {"label": "App deployment (Apps and Books / VPP)", "base_risk": 16, "effort_days": 3, "sequence": 6,
+      "checks": ["Content tokens move between MDMs one at a time; prefer device-based assignment", "Apps do not get revoked during the token move", "Packaged apps and installers rebuilt in the target"]},
+    "custom_script_policy": {"label": "Scripts, policies, and extension attributes", "base_risk": 18, "effort_days": 5, "sequence": 3,
+      "checks": ["Each script reviewed, owner confirmed, or retired", "Triggered policies (enrollment, recurring, self-service) mapped to target equivalents", "Inventory attributes used for scoping rebuilt"]},
+    "patch_updates": {"label": "OS and app patch management", "base_risk": 14, "effort_days": 2, "sequence": 7,
+      "checks": ["Update deadlines and deferrals reproduced", "Declarative software update behavior tested", "Third-party app patching rebuilt"]},
+    "compliance_baseline": {"label": "Compliance baselines (CIS / mSCP / STIG)", "base_risk": 16, "effort_days": 3, "sequence": 7,
+      "checks": ["Baseline controls mapped one-to-one or exceptions recorded", "Audit evidence continuity for SOC 2 / ISO", "Drift remediation behavior understood"]},
+    "idp_device_trust": {"label": "IdP device trust / conditional access", "base_risk": 22, "effort_days": 3, "sequence": 8,
+      "checks": ["Compliance signal reconnected to the IdP", "Devices not yet migrated still satisfy the policy during transition", "Unmanaged-device fallback tested"]},
+    "login_window_auth": {"label": "Login window / local account management", "base_risk": 20, "effort_days": 3, "sequence": 6,
+      "checks": ["Replacement for the old login-window or identity tool decided", "Local accounts, passwords, and secure tokens preserved", "Test a full reboot-and-login cycle"]},
+    "self_service": {"label": "Self-service catalog", "base_risk": 8, "effort_days": 2, "sequence": 9,
+      "checks": ["Catalog items rebuilt and branded", "Users know where to find software post-migration"]},
+    "inventory_integration": {"label": "Inventory / ITAM / ticketing sync", "base_risk": 10, "effort_days": 2, "sequence": 9,
+      "checks": ["Serial-number keyed records stay linked", "Reports and dashboards re-pointed", "Lost-device and offboarding workflows rebuilt"]},
+    "mobile_ios": {"label": "iOS / iPadOS fleet", "base_risk": 16, "effort_days": 3, "sequence": 8,
+      "checks": ["Supervised versus user-enrolled counts known", "Managed app data and accounts survive the move or are re-provisioned", "Lost Mode and Activation Lock handled"]}
+  },
+  "gotchas": [
+    {"title": "One MDM at a time", "detail": "A device cannot be managed by two MDMs. During the swap it has no management, so network, security agent, and encryption profiles must land the moment enrollment completes.", "severity": "Critical"},
+    {"title": "FileVault recovery keys are held by the old MDM", "detail": "Keys escrowed in the old platform become unreachable once it is gone. Rotate and re-escrow to the target before removing the old enrollment, and test recovery.", "severity": "Critical"},
+    {"title": "Activation Lock exposure", "detail": "Wiping or removing management without handling Activation Lock bypass codes can brick org-owned devices. Confirm how each fleet segment is protected before any wipe.", "severity": "Critical"},
+    {"title": "Enrollment method decides the user experience", "detail": "Recent OS releases add a managed MDM migration path for ADE devices without a wipe; older releases may need unenroll and re-enroll, an erase, or user action. Verify OS minimums and both vendors' current support for each device segment.", "severity": "High"},
+    {"title": "Certificates tied to the old MDM", "detail": "Device identity certificates issued through the old MDM's SCEP/ACME path break Wi-Fi, VPN, and device trust when it goes away. Reissue before cutover.", "severity": "High"},
+    {"title": "Security agents need re-approval", "detail": "Privacy and system extension approvals are delivered by profile. If they are missing at enrollment, the agent can lose protection or show the user prompts.", "severity": "High"},
+    {"title": "Remote workers and non-ADE devices", "detail": "Devices outside the office or enrolled by users need a self-driven path with clear instructions and helpdesk support. Plan for stragglers and a deadline.", "severity": "Medium"},
+    {"title": "Scripts are hidden business logic", "detail": "Years of policies and scripts quietly enforce settings and fixes. Audit them with owners; some should be retired, not ported.", "severity": "Medium"}
+  ],
+  "pair_gotchas": {
+    "jamf>kandji": [
+      {"title": "Smart groups and extension attributes", "detail": "Scoping built on Jamf smart groups and extension attributes needs a different mechanism in Kandji (blueprints and tags). Map scoping logic before porting individual items.", "severity": "High"},
+      {"title": "Policies versus library items", "detail": "Jamf policies with triggers do not map one to one to Kandji library items and automations. Redesign by outcome, not by object.", "severity": "High"},
+      {"title": "Login window and Jamf Connect", "detail": "If Jamf Connect manages login and account creation, choose and test a replacement before moving those devices.", "severity": "High"}
+    ],
+    "kandji>jamf": [
+      {"title": "Blueprints to smart groups and policies", "detail": "Blueprint-based scoping must be rebuilt as smart groups, policies, and configuration profiles, which gives more control and more to maintain.", "severity": "High"},
+      {"title": "Auto Apps and Audit and Enforce", "detail": "Auto-updating apps and built-in compliance remediation need explicit equivalents (patch management, policies, compliance editor).", "severity": "High"}
+    ]
+  },
+  "discovery": [
+    "Jamf: API or export of computers, mobile devices, configuration profiles, policies, scripts, packages, smart groups, extension attributes",
+    "Jamf: scope and last-execution data for policies to find dead ones",
+    "Kandji: export of devices, blueprints, library items, and custom scripts",
+    "Apple Business Manager: device assignments, MDM servers, and Apps and Books tokens",
+    "Security: EDR vendor's current deployment profile, PKI/SCEP/ACME configuration",
+    "Network team: Wi-Fi and VPN authentication method and certificate dependencies",
+    "Fleet segmentation: ADE versus manual, OS versions, supervised state, remote versus on-site"
+  ],
+  "phases": [
+    {"name": "Discover and decide", "activities": ["Inventory profiles, scripts, scopes, and certificates", "Segment the fleet by enrollment method and OS", "Retire dead policies before porting", "Record decisions as ADRs"]},
+    {"name": "Build and pilot", "activities": ["Stand up the target MDM and mirror configuration", "Verify escrow, certificates, and security agent in a lab", "Migrate IT devices as pilot"]},
+    {"name": "Migrate in waves", "activities": ["Move device groups in the generated order", "Verify health after every wave", "Handle stragglers with a deadline and escalation"]},
+    {"name": "Decommission", "activities": ["Remove old MDM tokens and integrations", "Archive configuration and logs", "Update runbooks and compliance evidence"]}
+  ],
+  "cutover_checklist": [
+    "Recovery keys and bootstrap tokens verified in the target for wave devices",
+    "Network, certificate, and security agent profiles confirmed to land at enrollment",
+    "Activation Lock handling confirmed for every device in the wave",
+    "Apple Business Manager assignment step rehearsed",
+    "User instructions sent with deadline and helpdesk contact",
+    "Pilot device passed full reboot, login, VPN, and agent health test",
+    "Success metric defined (enrolled, compliant, agent healthy)"
+  ],
+  "rollback": [
+    "Before ABM reassignment: re-enroll the device in the old MDM using the saved profiles",
+    "Keep the old MDM instance and tokens intact until the final wave completes",
+    "Per wave: documented steps to pause and revert ABM assignment and restore previous enrollment where supported",
+    "Escalation path for devices stuck unmanaged"
+  ],
+  "exit_criteria": [
+    "100 percent of in-scope devices checked in to the new MDM",
+    "No devices checking in to the old MDM for 30 days",
+    "Escrow, certificates, and security agent verified fleet-wide",
+    "Old MDM decommissioned with archived configuration"
+  ],
+  "stakeholders": ["IT / endpoint team", "Security", "Network", "Helpdesk", "Apple Business Manager admin", "Compliance", "End users and managers"],
+  "decisions": [
+    {"title": "Migration method per device segment", "options": ["Managed migration without wipe", "Unenroll and re-enroll", "Erase and reprovision", "User-driven enrollment"]},
+    {"title": "Login window and account strategy", "options": ["Keep current tool", "Replace with target equivalent", "Move to IdP-native device login"]},
+    {"title": "Scripts and policies", "options": ["Port 1:1", "Redesign by outcome", "Retire unused"]}
+  ]
+}

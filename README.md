@@ -1,8 +1,8 @@
 # Claude plugins for IT and engineering leaders
 
-Five Claude plugins I built and used day to day: running a job search, grooming a Jira backlog and governing AI spend, triaging what needs me across email, Slack and Jira, turning meeting transcripts into notes and action items, and making architecture decisions that hold up to review.
+Six Claude plugins I built and used day to day: running a job search, grooming a Jira backlog and governing AI spend, triaging what needs me across email, Slack and Jira, turning meeting transcripts into notes and action items, making architecture decisions that hold up to review, and planning SaaS platform migrations.
 
-They are written as Claude skills (Markdown instructions plus a small config file), so they run in Claude Code or Claude Cowork without any code to deploy. The exception is architect-toolkit, which ships small stdlib-only Python scripts so scoring and scanning are reproducible.
+They are written as Claude skills (Markdown instructions plus a small config file), so they run in Claude Code or Claude Cowork without any code to deploy. The exceptions are architect-toolkit and saas-migration-planner, which ship small stdlib-only Python scripts so scoring and scanning are reproducible.
 
 | Plugin | What it does |
 |---|---|
@@ -11,6 +11,7 @@ They are written as Claude skills (Markdown instructions plus a small config fil
 | [catch-me-up](plugins/catch-me-up) | One pass over Gmail, Slack, Jira, and other connected apps that reports only what actually needs you, sorted Critical or Important. Per-person setup. |
 | [transcript-processor](plugins/transcript-processor) | Takes a meeting transcript, routes it to the right 1:1 or team file, writes the summary and action items, and flags issues showing up across more than one person. |
 | [architect-toolkit](plugins/architect-toolkit) | Interviews you through an architecture decision, scores options with a reason for every score, stress-tests the winner with sensitivity analysis, runs an adversarial pre-mortem, and reviews Terraform and CloudFormation into an HTML report with evidence for every finding. |
+| [saas-migration-planner](plugins/saas-migration-planner) | Turns an integration inventory into a migration plan for identity provider (Entra/Okta), HRIS (Workday/Rippling), or Apple MDM (Jamf/Kandji) moves: risk-scored dependencies, cutover waves that respect freezes and payroll boundaries, rollback, comms calendar, and an HTML roadmap. |
 
 ## Design choices that run through all of them
 

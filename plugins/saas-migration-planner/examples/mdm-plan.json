@@ -1,0 +1,885 @@
+{
+  "pack": "mdm",
+  "title": "MDM migration (Apple fleet)",
+  "summary": "Moving managed Apple devices between MDM platforms (for example Jamf Pro to Kandji, or the reverse). A device has one MDM enrollment at a time, so the risk is the gap between old management ending and new management taking hold: lost profiles, escrowed keys, certificates, and security agents.",
+  "source": "jamf",
+  "target": "kandji",
+  "generated": "2026-10-10",
+  "settings": {
+    "start": "2026-11-02",
+    "wave_size": 8,
+    "wave_weeks": 2,
+    "freezes": []
+  },
+  "inventory_errors": [],
+  "cycles": [],
+  "items": [
+    {
+      "name": "VPN profile",
+      "type": "wifi_vpn_cert",
+      "owner": "Network",
+      "users": 950,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [],
+      "risk": 53,
+      "level": "Medium",
+      "drivers": [
+        "high-risk integration type (Wi-Fi, VPN, and certificates)",
+        "business criticality 4/5",
+        "950 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 4.0,
+      "checks": [
+        "Network and certificate profiles delivered first so devices do not lose connectivity",
+        "SCEP/ACME certificates bound to the old MDM are reissued before removal",
+        "802.1X EAP-TLS tested end to end with a migrated device"
+      ],
+      "type_label": "Wi-Fi, VPN, and certificates",
+      "sequence": 1,
+      "dep_level": 0,
+      "wave": 1
+    },
+    {
+      "name": "Script library (74 scripts)",
+      "type": "custom_script_policy",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 3,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "Many unowned",
+      "depends_on": [],
+      "risk": 52,
+      "level": "Medium",
+      "drivers": [
+        "950 affected users",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 7.5,
+      "checks": [
+        "Each script reviewed, owner confirmed, or retired",
+        "Triggered policies (enrollment, recurring, self-service) mapped to target equivalents",
+        "Inventory attributes used for scoping rebuilt"
+      ],
+      "type_label": "Scripts, policies, and extension attributes",
+      "sequence": 3,
+      "dep_level": 0,
+      "wave": 1
+    },
+    {
+      "name": "Baseline security profiles",
+      "type": "configuration_profile",
+      "owner": "Security",
+      "users": 950,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "CIS level 1",
+      "depends_on": [],
+      "risk": 49,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 4/5",
+        "950 affected users",
+        "3 item(s) depend on it"
+      ],
+      "dependents": 3,
+      "effort_days": 3.0,
+      "checks": [
+        "Each profile mapped to a target library item or custom profile, with payload gaps listed",
+        "PPPC, system extension, and notification payloads recreated with correct team IDs",
+        "Profiles installed immediately on enrollment, not in a later cycle"
+      ],
+      "type_label": "Configuration profiles and restrictions",
+      "sequence": 3,
+      "dep_level": 0,
+      "wave": 1
+    },
+    {
+      "name": "Wi-Fi and 802.1X certs",
+      "type": "wifi_vpn_cert",
+      "owner": "Network",
+      "users": 950,
+      "criticality": 5,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "SCEP issued through Jamf today",
+      "depends_on": [],
+      "risk": 68,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Wi-Fi, VPN, and certificates)",
+        "business criticality 5/5",
+        "950 affected users",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 6.0,
+      "checks": [
+        "Network and certificate profiles delivered first so devices do not lose connectivity",
+        "SCEP/ACME certificates bound to the old MDM are reissued before removal",
+        "802.1X EAP-TLS tested end to end with a migrated device"
+      ],
+      "type_label": "Wi-Fi, VPN, and certificates",
+      "sequence": 1,
+      "dep_level": 0,
+      "wave": 2
+    },
+    {
+      "name": "FileVault escrow",
+      "type": "filevault_escrow",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Personal recovery keys held in Jamf",
+      "depends_on": [],
+      "risk": 65,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (FileVault recovery key / bootstrap token escrow)",
+        "business criticality 5/5",
+        "950 affected users",
+        "3 item(s) depend on it"
+      ],
+      "dependents": 3,
+      "effort_days": 3.0,
+      "checks": [
+        "Recovery keys rotated and escrowed in the target BEFORE the old MDM is removed",
+        "Bootstrap token escrowed in the target",
+        "Recovery tested on a pilot device"
+      ],
+      "type_label": "FileVault recovery key / bootstrap token escrow",
+      "sequence": 4,
+      "dep_level": 0,
+      "wave": 2
+    },
+    {
+      "name": "ADE assignment in ABM",
+      "type": "ade_enrollment",
+      "owner": "Endpoint",
+      "users": 900,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "50 devices are user-enrolled not ADE",
+      "depends_on": [
+        "FileVault escrow"
+      ],
+      "risk": 62,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Automated Device Enrollment (ABM) assignment)",
+        "business criticality 5/5",
+        "900 affected users",
+        "3 item(s) depend on it"
+      ],
+      "dependents": 3,
+      "effort_days": 3.0,
+      "checks": [
+        "Device assignment moved to the new MDM server in Apple Business Manager at the right moment",
+        "Supervision state and enrollment method per device model recorded",
+        "Non-ADE or user-enrolled devices handled with a user-driven path"
+      ],
+      "type_label": "Automated Device Enrollment (ABM) assignment",
+      "sequence": 5,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "EDR agent profile",
+      "type": "security_agent",
+      "owner": "Security",
+      "users": 950,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Full disk and system extension approvals",
+      "depends_on": [],
+      "risk": 60,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (EDR / security agents)",
+        "business criticality 5/5",
+        "950 affected users",
+        "2 item(s) depend on it"
+      ],
+      "dependents": 2,
+      "effort_days": 2.5,
+      "checks": [
+        "Full Disk Access, system extension, and network extension approvals deployed with the agent vendor's current profile",
+        "Agent healthy and reporting after enrollment",
+        "Security team confirms no coverage gap during the swap"
+      ],
+      "type_label": "EDR / security agents",
+      "sequence": 2,
+      "dep_level": 0,
+      "wave": 2
+    },
+    {
+      "name": "Smart group scoping",
+      "type": "custom_script_policy",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 4,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "Extension attributes drive scoping",
+      "depends_on": [],
+      "risk": 57,
+      "level": "High",
+      "drivers": [
+        "business criticality 4/5",
+        "950 affected users",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 7.5,
+      "checks": [
+        "Each script reviewed, owner confirmed, or retired",
+        "Triggered policies (enrollment, recurring, self-service) mapped to target equivalents",
+        "Inventory attributes used for scoping rebuilt"
+      ],
+      "type_label": "Scripts, policies, and extension attributes",
+      "sequence": 3,
+      "dep_level": 0,
+      "wave": 2
+    },
+    {
+      "name": "Bootstrap token",
+      "type": "filevault_escrow",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "FileVault escrow"
+      ],
+      "risk": 54,
+      "level": "Medium",
+      "drivers": [
+        "high-risk integration type (FileVault recovery key / bootstrap token escrow)",
+        "business criticality 4/5",
+        "950 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 3.0,
+      "checks": [
+        "Recovery keys rotated and escrowed in the target BEFORE the old MDM is removed",
+        "Bootstrap token escrowed in the target",
+        "Recovery tested on a pilot device"
+      ],
+      "type_label": "FileVault recovery key / bootstrap token escrow",
+      "sequence": 4,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "PPPC and notifications",
+      "type": "configuration_profile",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 3,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "EDR agent profile"
+      ],
+      "risk": 48,
+      "level": "Medium",
+      "drivers": [
+        "950 affected users",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 4.5,
+      "checks": [
+        "Each profile mapped to a target library item or custom profile, with payload gaps listed",
+        "PPPC, system extension, and notification payloads recreated with correct team IDs",
+        "Profiles installed immediately on enrollment, not in a later cycle"
+      ],
+      "type_label": "Configuration profiles and restrictions",
+      "sequence": 3,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Software update enforcement",
+      "type": "patch_updates",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 3,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Baseline security profiles"
+      ],
+      "risk": 38,
+      "level": "Medium",
+      "drivers": [
+        "950 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 2.0,
+      "checks": [
+        "Update deadlines and deferrals reproduced",
+        "Declarative software update behavior tested",
+        "Third-party app patching rebuilt"
+      ],
+      "type_label": "OS and app patch management",
+      "sequence": 7,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Okta device trust",
+      "type": "idp_device_trust",
+      "owner": "IT",
+      "users": 950,
+      "criticality": 5,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Baseline security profiles",
+        "EDR agent profile"
+      ],
+      "risk": 66,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (IdP device trust / conditional access)",
+        "business criticality 5/5",
+        "950 affected users",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 4.5,
+      "checks": [
+        "Compliance signal reconnected to the IdP",
+        "Devices not yet migrated still satisfy the policy during transition",
+        "Unmanaged-device fallback tested"
+      ],
+      "type_label": "IdP device trust / conditional access",
+      "sequence": 8,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Compliance baseline reporting",
+      "type": "compliance_baseline",
+      "owner": "Security",
+      "users": 950,
+      "criticality": 4,
+      "target_support": "custom",
+      "fixed_date": "Annual SOC 2 audit window",
+      "notes": "",
+      "depends_on": [
+        "Baseline security profiles"
+      ],
+      "risk": 65,
+      "level": "High",
+      "drivers": [
+        "business criticality 4/5",
+        "950 affected users",
+        "target support: custom",
+        "dated constraint: Annual SOC 2 audit window"
+      ],
+      "dependents": 0,
+      "effort_days": 4.5,
+      "checks": [
+        "Baseline controls mapped one-to-one or exceptions recorded",
+        "Audit evidence continuity for SOC 2 / ISO",
+        "Drift remediation behavior understood"
+      ],
+      "type_label": "Compliance baselines (CIS / mSCP / STIG)",
+      "sequence": 7,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Apps and Books licenses",
+      "type": "app_deployment",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 3,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "ADE assignment in ABM"
+      ],
+      "risk": 42,
+      "level": "Medium",
+      "drivers": [
+        "950 affected users",
+        "1 item(s) depend on it"
+      ],
+      "dependents": 1,
+      "effort_days": 3.0,
+      "checks": [
+        "Content tokens move between MDMs one at a time; prefer device-based assignment",
+        "Apps do not get revoked during the token move",
+        "Packaged apps and installers rebuilt in the target"
+      ],
+      "type_label": "App deployment (Apps and Books / VPP)",
+      "sequence": 6,
+      "dep_level": 2,
+      "wave": 3
+    },
+    {
+      "name": "Asset inventory sync",
+      "type": "inventory_integration",
+      "owner": "IT",
+      "users": 950,
+      "criticality": 2,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "ADE assignment in ABM"
+      ],
+      "risk": 39,
+      "level": "Medium",
+      "drivers": [
+        "950 affected users",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 3.0,
+      "checks": [
+        "Serial-number keyed records stay linked",
+        "Reports and dashboards re-pointed",
+        "Lost-device and offboarding workflows rebuilt"
+      ],
+      "type_label": "Inventory / ITAM / ticketing sync",
+      "sequence": 9,
+      "dep_level": 2,
+      "wave": 3
+    },
+    {
+      "name": "Self Service catalog",
+      "type": "self_service",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 2,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Apps and Books licenses"
+      ],
+      "risk": 37,
+      "level": "Medium",
+      "drivers": [
+        "950 affected users",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 3.0,
+      "checks": [
+        "Catalog items rebuilt and branded",
+        "Users know where to find software post-migration"
+      ],
+      "type_label": "Self-service catalog",
+      "sequence": 9,
+      "dep_level": 3,
+      "wave": 3
+    },
+    {
+      "name": "iPad kiosk fleet",
+      "type": "mobile_ios",
+      "owner": "Ops",
+      "users": 120,
+      "criticality": 3,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "ADE assignment in ABM"
+      ],
+      "risk": 37,
+      "level": "Medium",
+      "drivers": [],
+      "dependents": 0,
+      "effort_days": 3.0,
+      "checks": [
+        "Supervised versus user-enrolled counts known",
+        "Managed app data and accounts survive the move or are re-provisioned",
+        "Lost Mode and Activation Lock handled"
+      ],
+      "type_label": "iOS / iPadOS fleet",
+      "sequence": 8,
+      "dep_level": 2,
+      "wave": 3
+    },
+    {
+      "name": "Login window tool",
+      "type": "login_window_auth",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 4,
+      "target_support": "none",
+      "fixed_date": "",
+      "notes": "Replacement not chosen",
+      "depends_on": [
+        "FileVault escrow"
+      ],
+      "risk": 69,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Login window / local account management)",
+        "business criticality 4/5",
+        "950 affected users",
+        "target support: none"
+      ],
+      "dependents": 0,
+      "effort_days": 6.0,
+      "checks": [
+        "Replacement for the old login-window or identity tool decided",
+        "Local accounts, passwords, and secure tokens preserved",
+        "Test a full reboot-and-login cycle"
+      ],
+      "type_label": "Login window / local account management",
+      "sequence": 6,
+      "dep_level": 1
+    }
+  ],
+  "waves": [
+    {
+      "number": 1,
+      "label": "Pilot",
+      "start": "2026-11-02",
+      "end": "2026-11-15",
+      "cutover": "2026-11-10",
+      "hypercare_until": "2026-11-17",
+      "shifted_for_freeze": false,
+      "shifted_for_anchor": false,
+      "anchored": [],
+      "items": [
+        "VPN profile",
+        "Baseline security profiles",
+        "Script library (74 scripts)"
+      ],
+      "effort_days": 14.5,
+      "peak_risk": 53,
+      "gating": [],
+      "comms": [
+        {
+          "when": "2026-10-27",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2026-11-03",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2026-11-09",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2026-11-10",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2026-11-11",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2026-11-17",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "label": "Wave 2",
+      "start": "2026-11-16",
+      "end": "2026-11-29",
+      "cutover": "2026-11-24",
+      "hypercare_until": "2026-12-01",
+      "shifted_for_freeze": false,
+      "shifted_for_anchor": false,
+      "anchored": [],
+      "items": [
+        "Wi-Fi and 802.1X certs",
+        "EDR agent profile",
+        "Smart group scoping",
+        "FileVault escrow",
+        "PPPC and notifications",
+        "Bootstrap token",
+        "ADE assignment in ABM",
+        "Software update enforcement"
+      ],
+      "effort_days": 31.5,
+      "peak_risk": 68,
+      "gating": [
+        "Owner sign-off and parallel/shadow run for Wi-Fi and 802.1X certs",
+        "Owner sign-off and parallel/shadow run for EDR agent profile",
+        "Owner sign-off and parallel/shadow run for Smart group scoping",
+        "Owner sign-off and parallel/shadow run for FileVault escrow",
+        "Owner sign-off and parallel/shadow run for ADE assignment in ABM"
+      ],
+      "comms": [
+        {
+          "when": "2026-11-10",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2026-11-17",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2026-11-23",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2026-11-24",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2026-11-25",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2026-12-01",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "label": "Final wave",
+      "start": "2026-11-30",
+      "end": "2026-12-13",
+      "cutover": "2026-12-08",
+      "hypercare_until": "2026-12-15",
+      "shifted_for_freeze": false,
+      "shifted_for_anchor": false,
+      "anchored": [],
+      "items": [
+        "Compliance baseline reporting",
+        "Okta device trust",
+        "Apps and Books licenses",
+        "iPad kiosk fleet",
+        "Asset inventory sync",
+        "Self Service catalog"
+      ],
+      "effort_days": 21.0,
+      "peak_risk": 66,
+      "gating": [
+        "Owner sign-off and parallel/shadow run for Compliance baseline reporting",
+        "Owner sign-off and parallel/shadow run for Okta device trust"
+      ],
+      "comms": [
+        {
+          "when": "2026-11-24",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2026-12-01",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2026-12-07",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2026-12-08",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2026-12-09",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2026-12-15",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    }
+  ],
+  "needs_decision": [
+    {
+      "name": "Login window tool",
+      "why": "No target support: replace, retire, or build a workaround (record as an ADR)",
+      "risk": 69,
+      "users": 950
+    }
+  ],
+  "gotchas": [
+    {
+      "title": "Smart groups and extension attributes",
+      "detail": "Scoping built on Jamf smart groups and extension attributes needs a different mechanism in Kandji (blueprints and tags). Map scoping logic before porting individual items.",
+      "severity": "High"
+    },
+    {
+      "title": "Policies versus library items",
+      "detail": "Jamf policies with triggers do not map one to one to Kandji library items and automations. Redesign by outcome, not by object.",
+      "severity": "High"
+    },
+    {
+      "title": "Login window and Jamf Connect",
+      "detail": "If Jamf Connect manages login and account creation, choose and test a replacement before moving those devices.",
+      "severity": "High"
+    },
+    {
+      "title": "One MDM at a time",
+      "detail": "A device cannot be managed by two MDMs. During the swap it has no management, so network, security agent, and encryption profiles must land the moment enrollment completes.",
+      "severity": "Critical"
+    },
+    {
+      "title": "FileVault recovery keys are held by the old MDM",
+      "detail": "Keys escrowed in the old platform become unreachable once it is gone. Rotate and re-escrow to the target before removing the old enrollment, and test recovery.",
+      "severity": "Critical"
+    },
+    {
+      "title": "Activation Lock exposure",
+      "detail": "Wiping or removing management without handling Activation Lock bypass codes can brick org-owned devices. Confirm how each fleet segment is protected before any wipe.",
+      "severity": "Critical"
+    },
+    {
+      "title": "Enrollment method decides the user experience",
+      "detail": "Recent OS releases add a managed MDM migration path for ADE devices without a wipe; older releases may need unenroll and re-enroll, an erase, or user action. Verify OS minimums and both vendors' current support for each device segment.",
+      "severity": "High"
+    },
+    {
+      "title": "Certificates tied to the old MDM",
+      "detail": "Device identity certificates issued through the old MDM's SCEP/ACME path break Wi-Fi, VPN, and device trust when it goes away. Reissue before cutover.",
+      "severity": "High"
+    },
+    {
+      "title": "Security agents need re-approval",
+      "detail": "Privacy and system extension approvals are delivered by profile. If they are missing at enrollment, the agent can lose protection or show the user prompts.",
+      "severity": "High"
+    },
+    {
+      "title": "Remote workers and non-ADE devices",
+      "detail": "Devices outside the office or enrolled by users need a self-driven path with clear instructions and helpdesk support. Plan for stragglers and a deadline.",
+      "severity": "Medium"
+    },
+    {
+      "title": "Scripts are hidden business logic",
+      "detail": "Years of policies and scripts quietly enforce settings and fixes. Audit them with owners; some should be retired, not ported.",
+      "severity": "Medium"
+    }
+  ],
+  "discovery": [
+    "Jamf: API or export of computers, mobile devices, configuration profiles, policies, scripts, packages, smart groups, extension attributes",
+    "Jamf: scope and last-execution data for policies to find dead ones",
+    "Kandji: export of devices, blueprints, library items, and custom scripts",
+    "Apple Business Manager: device assignments, MDM servers, and Apps and Books tokens",
+    "Security: EDR vendor's current deployment profile, PKI/SCEP/ACME configuration",
+    "Network team: Wi-Fi and VPN authentication method and certificate dependencies",
+    "Fleet segmentation: ADE versus manual, OS versions, supervised state, remote versus on-site"
+  ],
+  "phases": [
+    {
+      "name": "Discover and decide",
+      "activities": [
+        "Inventory profiles, scripts, scopes, and certificates",
+        "Segment the fleet by enrollment method and OS",
+        "Retire dead policies before porting",
+        "Record decisions as ADRs"
+      ]
+    },
+    {
+      "name": "Build and pilot",
+      "activities": [
+        "Stand up the target MDM and mirror configuration",
+        "Verify escrow, certificates, and security agent in a lab",
+        "Migrate IT devices as pilot"
+      ]
+    },
+    {
+      "name": "Migrate in waves",
+      "activities": [
+        "Move device groups in the generated order",
+        "Verify health after every wave",
+        "Handle stragglers with a deadline and escalation"
+      ]
+    },
+    {
+      "name": "Decommission",
+      "activities": [
+        "Remove old MDM tokens and integrations",
+        "Archive configuration and logs",
+        "Update runbooks and compliance evidence"
+      ]
+    }
+  ],
+  "cutover_checklist": [
+    "Recovery keys and bootstrap tokens verified in the target for wave devices",
+    "Network, certificate, and security agent profiles confirmed to land at enrollment",
+    "Activation Lock handling confirmed for every device in the wave",
+    "Apple Business Manager assignment step rehearsed",
+    "User instructions sent with deadline and helpdesk contact",
+    "Pilot device passed full reboot, login, VPN, and agent health test",
+    "Success metric defined (enrolled, compliant, agent healthy)"
+  ],
+  "rollback": [
+    "Before ABM reassignment: re-enroll the device in the old MDM using the saved profiles",
+    "Keep the old MDM instance and tokens intact until the final wave completes",
+    "Per wave: documented steps to pause and revert ABM assignment and restore previous enrollment where supported",
+    "Escalation path for devices stuck unmanaged"
+  ],
+  "exit_criteria": [
+    "100 percent of in-scope devices checked in to the new MDM",
+    "No devices checking in to the old MDM for 30 days",
+    "Escrow, certificates, and security agent verified fleet-wide",
+    "Old MDM decommissioned with archived configuration"
+  ],
+  "stakeholders": [
+    "IT / endpoint team",
+    "Security",
+    "Network",
+    "Helpdesk",
+    "Apple Business Manager admin",
+    "Compliance",
+    "End users and managers"
+  ],
+  "decisions": [
+    {
+      "title": "Migration method per device segment",
+      "options": [
+        "Managed migration without wipe",
+        "Unenroll and re-enroll",
+        "Erase and reprovision",
+        "User-driven enrollment"
+      ]
+    },
+    {
+      "title": "Login window and account strategy",
+      "options": [
+        "Keep current tool",
+        "Replace with target equivalent",
+        "Move to IdP-native device login"
+      ]
+    },
+    {
+      "title": "Scripts and policies",
+      "options": [
+        "Port 1:1",
+        "Redesign by outcome",
+        "Retire unused"
+      ]
+    }
+  ],
+  "totals": {
+    "items": 18,
+    "effort_days": 73.0,
+    "by_level": {
+      "High": 8,
+      "Medium": 10
+    }
+  }
+}

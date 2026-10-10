@@ -1,0 +1,22 @@
+name,type,owner,users,criticality,depends_on,target_support,fixed_date,notes
+Directory groups,group_directory,IT,1200,4,,native,,Includes nested groups used for app access
+Salesforce,saml_sso,Sales Ops,420,5,Directory groups,native,,NameID is UPN today
+Slack,saml_sso,IT,1200,4,Directory groups,native,,
+Zoom,saml_sso,IT,1200,3,Directory groups,native,,
+Box,saml_sso,IT,900,3,Directory groups,native,,
+Jira and Confluence,saml_sso,Eng Ops,650,4,Directory groups,native,,
+GitHub Enterprise,saml_sso,Eng Ops,380,5,Directory groups,native,,Org SSO enforced
+Workday,saml_sso,HR,1200,5,Directory groups,native,Payroll run on the 15th and last day,
+Expensify,oidc_sso,Finance,700,3,Directory groups,native,,
+Datadog,saml_sso,SRE,150,4,Directory groups,native,,
+Legacy intranet,legacy_auth,IT,800,2,Directory groups,none,,Header-based auth through app proxy
+Okta SCIM to Slack,scim_provisioning,IT,1200,4,Slack,native,,
+Okta SCIM to Salesforce,scim_provisioning,Sales Ops,420,5,Salesforce,native,,Role mapping is custom
+CI deploy pipelines,service_principal_api,Platform,12,5,,custom,,Use Entra app registrations and Graph API
+HR to AD sync scripts,service_principal_api,IT,3,4,,custom,,Owner left the company
+Conditional Access policies,conditional_access,Security,1200,5,Directory groups,custom,,23 policies today
+MFA enrollment,mfa_authenticators,Security,1200,5,Conditional Access policies,native,,Authenticator app and FIDO2
+Device compliance signal,device_trust,Endpoint,950,4,Conditional Access policies,custom,,Intune compliance feeds CA
+Partner guests,guest_b2b,Partnerships,140,2,Directory groups,custom,,
+Break-glass and global admins,privileged_admin,Security,6,5,,native,,
+Microsoft 365 federation,m365_federation,IT,1200,5,MFA enrollment;Device compliance signal;Conditional Access policies,native,,Exchange Online and Teams

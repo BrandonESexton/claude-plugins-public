@@ -1,0 +1,6 @@
+{
+  "name": "saas-migration-planner",
+  "version": "0.1.0",
+  "description": "Plans SaaS platform migrations (identity provider, HRIS, MDM) from an integration inventory: risk-scores every dependency, sequences cutover waves around freeze windows, and produces rollback plans, comms calendars, and an HTML roadmap. Packs for Entra/Okta, Workday/Rippling, and Jamf Pro/Kandji.",
+  "author": { "name": "Brandon Sexton", "email": "bsexton@pm.me" }
+}

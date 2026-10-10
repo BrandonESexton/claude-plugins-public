@@ -1,0 +1,19 @@
+name,type,owner,users,criticality,depends_on,target_support,fixed_date,notes
+Wi-Fi and 802.1X certs,wifi_vpn_cert,Network,950,5,,custom,,SCEP issued through Jamf today
+VPN profile,wifi_vpn_cert,Network,950,4,,native,,
+EDR agent profile,security_agent,Security,950,5,,native,,Full disk and system extension approvals
+FileVault escrow,filevault_escrow,Endpoint,950,5,,native,,Personal recovery keys held in Jamf
+Bootstrap token,filevault_escrow,Endpoint,950,4,FileVault escrow,native,,
+ADE assignment in ABM,ade_enrollment,Endpoint,900,5,FileVault escrow,native,,50 devices are user-enrolled not ADE
+Baseline security profiles,configuration_profile,Security,950,4,,native,,CIS level 1
+PPPC and notifications,configuration_profile,Endpoint,950,3,EDR agent profile,custom,,
+Apps and Books licenses,app_deployment,Endpoint,950,3,ADE assignment in ABM,native,,
+Script library (74 scripts),custom_script_policy,Endpoint,950,3,,custom,,Many unowned
+Smart group scoping,custom_script_policy,Endpoint,950,4,,custom,,Extension attributes drive scoping
+Software update enforcement,patch_updates,Endpoint,950,3,Baseline security profiles,native,,
+Compliance baseline reporting,compliance_baseline,Security,950,4,Baseline security profiles,custom,Annual SOC 2 audit window,
+Okta device trust,idp_device_trust,IT,950,5,Baseline security profiles;EDR agent profile,custom,,
+Login window tool,login_window_auth,Endpoint,950,4,FileVault escrow,none,,Replacement not chosen
+Self Service catalog,self_service,Endpoint,950,2,Apps and Books licenses,custom,,
+Asset inventory sync,inventory_integration,IT,950,2,ADE assignment in ABM,custom,,
+iPad kiosk fleet,mobile_ios,Ops,120,3,ADE assignment in ABM,native,,

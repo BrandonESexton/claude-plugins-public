@@ -1,0 +1,834 @@
+{
+  "pack": "hris",
+  "title": "HRIS / HCM migration",
+  "summary": "Moving the employee system of record (for example Workday to Rippling). The HRIS feeds payroll, benefits, identity, finance, and compliance, so cutover dates are driven by payroll and benefit calendars, not by technical readiness.",
+  "source": "workday",
+  "target": "rippling",
+  "generated": "2026-10-10",
+  "settings": {
+    "start": "2026-11-02",
+    "wave_size": 8,
+    "wave_weeks": 2,
+    "freezes": []
+  },
+  "inventory_errors": [],
+  "cycles": [],
+  "items": [
+    {
+      "name": "I-9 and personnel files",
+      "type": "compliance_records",
+      "owner": "Legal",
+      "users": 1200,
+      "criticality": 4,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "Retention applies after termination",
+      "depends_on": [],
+      "risk": 59,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Compliance records (I-9, personnel files))",
+        "business criticality 4/5",
+        "1,200 affected users",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 7.5,
+      "checks": [
+        "I-9 and personnel file retention requirements confirmed with Legal",
+        "Audit trail and document images migrated or archived with access",
+        "Legacy system retained read-only for the retention period"
+      ],
+      "type_label": "Compliance records (I-9, personnel files)",
+      "sequence": 7,
+      "dep_level": 0,
+      "wave": 1
+    },
+    {
+      "name": "Worker ID mapping",
+      "type": "org_directory",
+      "owner": "HR Ops",
+      "users": 1200,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Source of truth for downstream keys",
+      "depends_on": [],
+      "risk": 57,
+      "level": "High",
+      "drivers": [
+        "business criticality 5/5",
+        "1,200 affected users",
+        "7 item(s) depend on it"
+      ],
+      "dependents": 7,
+      "effort_days": 4.0,
+      "checks": [
+        "Supervisory org, department, and position model mapped to target structure",
+        "Manager hierarchy and org chart consumers listed",
+        "Worker ID continuity table created"
+      ],
+      "type_label": "Org structure and directory",
+      "sequence": 1,
+      "dep_level": 0,
+      "wave": 1
+    },
+    {
+      "name": "Org structure and cost centers",
+      "type": "org_directory",
+      "owner": "HR Ops",
+      "users": 1200,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Supervisory orgs to departments",
+      "depends_on": [],
+      "risk": 52,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 4/5",
+        "1,200 affected users",
+        "4 item(s) depend on it"
+      ],
+      "dependents": 4,
+      "effort_days": 4.0,
+      "checks": [
+        "Supervisory org, department, and position model mapped to target structure",
+        "Manager hierarchy and org chart consumers listed",
+        "Worker ID continuity table created"
+      ],
+      "type_label": "Org structure and directory",
+      "sequence": 1,
+      "dep_level": 0,
+      "wave": 1
+    },
+    {
+      "name": "GL payroll journal",
+      "type": "gl_accounting",
+      "owner": "Finance",
+      "users": 15,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "Month-end close",
+      "notes": "",
+      "depends_on": [
+        "Org structure and cost centers"
+      ],
+      "risk": 59,
+      "level": "High",
+      "drivers": [
+        "business criticality 5/5",
+        "dated constraint: Month-end close",
+        "1 item(s) depend on it"
+      ],
+      "dependents": 1,
+      "effort_days": 4.0,
+      "checks": [
+        "Cost center and company hierarchy mapped",
+        "Payroll journal format validated with Accounting",
+        "Headcount and labor cost reports reconcile"
+      ],
+      "type_label": "Finance / GL / cost center",
+      "sequence": 5,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Headcount reporting",
+      "type": "reporting_bi",
+      "owner": "Finance",
+      "users": 25,
+      "criticality": 4,
+      "target_support": "custom",
+      "fixed_date": "Month-end close",
+      "notes": "Calculated fields have no equivalent",
+      "depends_on": [
+        "Org structure and cost centers"
+      ],
+      "risk": 58,
+      "level": "High",
+      "drivers": [
+        "business criticality 4/5",
+        "target support: custom",
+        "dated constraint: Month-end close"
+      ],
+      "dependents": 0,
+      "effort_days": 7.5,
+      "checks": [
+        "Custom reports and calculated fields inventoried and rebuilt",
+        "Historical headcount and attrition series preserved for Finance and board reporting",
+        "Data warehouse feed re-pointed"
+      ],
+      "type_label": "Reporting, BI, and headcount history",
+      "sequence": 3,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Okta provisioning feed",
+      "type": "idp_provisioning",
+      "owner": "IT",
+      "users": 1200,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Joiner mover leaver",
+      "depends_on": [
+        "Worker ID mapping"
+      ],
+      "risk": 54,
+      "level": "Medium",
+      "drivers": [
+        "high-risk integration type (Identity provisioning (HR as source))",
+        "business criticality 5/5",
+        "1,200 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 3.0,
+      "checks": [
+        "Joiner/mover/leaver events replicated and tested end to end",
+        "Unique worker ID mapping preserved",
+        "Termination timing and deactivation behavior verified"
+      ],
+      "type_label": "Identity provisioning (HR as source)",
+      "sequence": 4,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Lattice performance",
+      "type": "lms_performance",
+      "owner": "People",
+      "users": 1200,
+      "criticality": 3,
+      "target_support": "native",
+      "fixed_date": "Mid-year review cycle",
+      "notes": "",
+      "depends_on": [
+        "Worker ID mapping"
+      ],
+      "risk": 44,
+      "level": "Medium",
+      "drivers": [
+        "1,200 affected users",
+        "dated constraint: Mid-year review cycle"
+      ],
+      "dependents": 0,
+      "effort_days": 3.0,
+      "checks": [
+        "Review cycle timing respected",
+        "Historical ratings and training records archived or imported",
+        "Comp planning cycle not interrupted"
+      ],
+      "type_label": "Learning, performance, comp planning",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Workflow approvals",
+      "type": "workflow_approvals",
+      "owner": "HR Ops",
+      "users": 60,
+      "criticality": 3,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "18 business processes",
+      "depends_on": [
+        "Org structure and cost centers"
+      ],
+      "risk": 42,
+      "level": "Medium",
+      "drivers": [
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 4.5,
+      "checks": [
+        "Each business process rebuilt, not assumed to port",
+        "Approver delegation and exceptions documented",
+        "In-flight transactions drained before cutover"
+      ],
+      "type_label": "Business processes and approvals",
+      "sequence": 4,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Learning platform",
+      "type": "lms_performance",
+      "owner": "People",
+      "users": 1200,
+      "criticality": 2,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Worker ID mapping"
+      ],
+      "risk": 39,
+      "level": "Medium",
+      "drivers": [
+        "1,200 affected users",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 4.5,
+      "checks": [
+        "Review cycle timing respected",
+        "Historical ratings and training records archived or imported",
+        "Comp planning cycle not interrupted"
+      ],
+      "type_label": "Learning, performance, comp planning",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Greenhouse ATS",
+      "type": "ats_recruiting",
+      "owner": "Talent",
+      "users": 60,
+      "criticality": 3,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Worker ID mapping"
+      ],
+      "risk": 32,
+      "level": "Low",
+      "drivers": [],
+      "dependents": 0,
+      "effort_days": 2.0,
+      "checks": [
+        "Pre-hires in flight at cutover handled",
+        "Offer and new-hire data handoff re-pointed",
+        "Background check and onboarding tasks routed"
+      ],
+      "type_label": "Recruiting / ATS and onboarding",
+      "sequence": 3,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Expensify",
+      "type": "expense_travel",
+      "owner": "Finance",
+      "users": 700,
+      "criticality": 3,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Worker ID mapping"
+      ],
+      "risk": 32,
+      "level": "Low",
+      "drivers": [
+        "700 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 1.5,
+      "checks": [
+        "Employee and manager hierarchy sync re-pointed",
+        "Approval chains verified"
+      ],
+      "type_label": "Expense and travel",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Benefits carrier feeds",
+      "type": "benefits_carrier",
+      "owner": "Benefits",
+      "users": 1200,
+      "criticality": 5,
+      "target_support": "custom",
+      "fixed_date": "Open enrollment in November",
+      "notes": "Three carriers",
+      "depends_on": [
+        "Worker ID mapping"
+      ],
+      "risk": 78,
+      "level": "Critical",
+      "drivers": [
+        "high-risk integration type (Benefits and carrier feeds)",
+        "business criticality 5/5",
+        "1,200 affected users",
+        "target support: custom",
+        "dated constraint: Open enrollment in November",
+        "1 item(s) depend on it"
+      ],
+      "dependents": 1,
+      "effort_days": 12.0,
+      "checks": [
+        "Carrier eligibility files (EDI 834 or vendor format) rebuilt and test-validated with each carrier",
+        "Plan year and open enrollment timing respected",
+        "COBRA, ACA, and deduction codes mapped"
+      ],
+      "type_label": "Benefits and carrier feeds",
+      "sequence": 8,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Payroll",
+      "type": "payroll",
+      "owner": "Payroll",
+      "users": 1200,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "Payroll run on the 15th and last day",
+      "notes": "Two parallel runs required",
+      "depends_on": [
+        "Time and absence",
+        "GL payroll journal",
+        "Benefits carrier feeds"
+      ],
+      "risk": 69,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Payroll)",
+        "business criticality 5/5",
+        "1,200 affected users",
+        "dated constraint: Payroll run on the 15th and last day"
+      ],
+      "dependents": 0,
+      "effort_days": 15.0,
+      "checks": [
+        "Parallel payroll runs reconciled to the penny before go-live",
+        "Cutover at a quarter boundary (ideally year start) to simplify YTD balances and tax filings",
+        "State/local tax accounts, SUI rates, and garnishments mapped"
+      ],
+      "type_label": "Payroll",
+      "sequence": 9,
+      "dep_level": 2,
+      "wave": 3
+    },
+    {
+      "name": "Custom EIB to GL",
+      "type": "custom_integration",
+      "owner": "Finance",
+      "users": 10,
+      "criticality": 4,
+      "target_support": "custom",
+      "fixed_date": "Month-end close",
+      "notes": "Owner unknown",
+      "depends_on": [
+        "Org structure and cost centers"
+      ],
+      "risk": 61,
+      "level": "High",
+      "drivers": [
+        "business criticality 4/5",
+        "target support: custom",
+        "dated constraint: Month-end close"
+      ],
+      "dependents": 0,
+      "effort_days": 6.0,
+      "checks": [
+        "Owner and business purpose confirmed or the integration retired",
+        "Field mapping and format validated with the consumer",
+        "Credentials and endpoints re-issued"
+      ],
+      "type_label": "Custom integration (EIB, API, file transfer)",
+      "sequence": 5,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Time and absence",
+      "type": "time_absence",
+      "owner": "HR Ops",
+      "users": 1200,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Accrual policies by region",
+      "depends_on": [
+        "Worker ID mapping"
+      ],
+      "risk": 49,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 4/5",
+        "1,200 affected users",
+        "1 item(s) depend on it"
+      ],
+      "dependents": 1,
+      "effort_days": 6.0,
+      "checks": [
+        "Accrual balances and policy rules mapped and recomputed",
+        "Approved future-dated leave carried over",
+        "Timekeeping feeds to payroll tested"
+      ],
+      "type_label": "Time, attendance, and leave",
+      "sequence": 6,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Legacy bonus tool",
+      "type": "custom_integration",
+      "owner": "Finance",
+      "users": 40,
+      "criticality": 2,
+      "target_support": "none",
+      "fixed_date": "",
+      "notes": "Vendor retired its connector",
+      "depends_on": [],
+      "risk": 53,
+      "level": "Medium",
+      "drivers": [
+        "target support: none"
+      ],
+      "dependents": 0,
+      "effort_days": 8.0,
+      "checks": [
+        "Owner and business purpose confirmed or the integration retired",
+        "Field mapping and format validated with the consumer",
+        "Credentials and endpoints re-issued"
+      ],
+      "type_label": "Custom integration (EIB, API, file transfer)",
+      "sequence": 5,
+      "dep_level": 0
+    }
+  ],
+  "waves": [
+    {
+      "number": 1,
+      "label": "Pilot",
+      "start": "2026-11-02",
+      "end": "2026-11-15",
+      "cutover": "2026-11-10",
+      "hypercare_until": "2026-11-17",
+      "shifted_for_freeze": false,
+      "shifted_for_anchor": false,
+      "anchored": [],
+      "items": [
+        "Org structure and cost centers",
+        "Worker ID mapping",
+        "I-9 and personnel files"
+      ],
+      "effort_days": 15.5,
+      "peak_risk": 59,
+      "gating": [
+        "Owner sign-off and parallel/shadow run for Worker ID mapping",
+        "Owner sign-off and parallel/shadow run for I-9 and personnel files"
+      ],
+      "comms": [
+        {
+          "when": "2026-10-27",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2026-11-03",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2026-11-09",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2026-11-10",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2026-11-11",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2026-11-17",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "label": "Wave 2",
+      "start": "2026-11-16",
+      "end": "2026-11-29",
+      "cutover": "2026-11-24",
+      "hypercare_until": "2026-12-01",
+      "shifted_for_freeze": false,
+      "shifted_for_anchor": false,
+      "anchored": [],
+      "items": [
+        "Expensify",
+        "Learning platform",
+        "Lattice performance",
+        "Greenhouse ATS",
+        "Headcount reporting",
+        "Workflow approvals",
+        "Okta provisioning feed",
+        "GL payroll journal"
+      ],
+      "effort_days": 30.0,
+      "peak_risk": 59,
+      "gating": [
+        "Owner sign-off and parallel/shadow run for Headcount reporting",
+        "Owner sign-off and parallel/shadow run for GL payroll journal"
+      ],
+      "comms": [
+        {
+          "when": "2026-11-10",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2026-11-17",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2026-11-23",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2026-11-24",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2026-11-25",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2026-12-01",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "label": "Final wave",
+      "start": "2026-12-28",
+      "end": "2027-01-10",
+      "cutover": "2027-01-05",
+      "hypercare_until": "2027-01-12",
+      "shifted_for_freeze": false,
+      "shifted_for_anchor": true,
+      "anchored": [
+        "Benefits carrier feeds",
+        "Payroll"
+      ],
+      "items": [
+        "Custom EIB to GL",
+        "Time and absence",
+        "Benefits carrier feeds",
+        "Payroll"
+      ],
+      "effort_days": 39.0,
+      "peak_risk": 78,
+      "gating": [
+        "Owner sign-off and parallel/shadow run for Custom EIB to GL",
+        "Owner sign-off and parallel/shadow run for Benefits carrier feeds",
+        "Owner sign-off and parallel/shadow run for Payroll"
+      ],
+      "comms": [
+        {
+          "when": "2026-12-22",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2026-12-29",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2027-01-04",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2027-01-05",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2027-01-06",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2027-01-12",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    }
+  ],
+  "needs_decision": [
+    {
+      "name": "Legacy bonus tool",
+      "why": "No target support: replace, retire, or build a workaround (record as an ADR)",
+      "risk": 53,
+      "users": 40
+    }
+  ],
+  "gotchas": [
+    {
+      "title": "Position-based versus job-based models",
+      "detail": "If Workday position management is in use, the target job-based model needs a deliberate mapping of positions, requisitions, and headcount plans.",
+      "severity": "High"
+    },
+    {
+      "title": "Integration Cloud replacements",
+      "detail": "EIBs, Core Connectors, and Studio integrations must each map to a target connector, API, or file feed. Inventory by system and by owner, and expect orphans.",
+      "severity": "High"
+    },
+    {
+      "title": "Calculated fields and custom reports",
+      "detail": "Workday calculated fields and composite reports used by Finance and HR have no direct equivalent. Rebuild against target reporting and reconcile headcount to the old numbers.",
+      "severity": "High"
+    },
+    {
+      "title": "Workday as IdP provisioning hub",
+      "detail": "If Workday drives joiners and leavers into the IdP, the handoff to the new HR source must be tested before it replaces the feed.",
+      "severity": "High"
+    },
+    {
+      "title": "Cutover dates belong to payroll, not IT",
+      "detail": "A mid-quarter or mid-year payroll move forces year-to-date wage imports and complicates tax filings. Anchor the schedule on a quarter or year boundary and work backward.",
+      "severity": "Critical"
+    },
+    {
+      "title": "Effective-dated history",
+      "detail": "Source systems keep dated job, comp, and org history. Decide how much history is imported versus archived, and keep the source read-only for lookups and audits.",
+      "severity": "High"
+    },
+    {
+      "title": "Worker ID continuity",
+      "detail": "Downstream systems key on employee ID. Keep a source-to-target mapping table and test every consumer against it.",
+      "severity": "High"
+    },
+    {
+      "title": "Benefits carriers have their own calendars",
+      "detail": "Carrier file changes take weeks to validate, and open enrollment timing may forbid changes. Start carrier testing at project kickoff.",
+      "severity": "High"
+    },
+    {
+      "title": "Business processes and security roles do not port",
+      "detail": "Approval chains, delegations, and role-based data access (especially compensation) must be rebuilt and access-reviewed. Over-permissioned defaults are a common leak.",
+      "severity": "High"
+    },
+    {
+      "title": "Compliance retention outlives the contract",
+      "detail": "I-9 and personnel records have statutory retention periods. Confirm the archive keeps them reachable after the old subscription ends.",
+      "severity": "High"
+    },
+    {
+      "title": "Ownership overlap with IT products",
+      "detail": "Some HRIS vendors also sell identity and device management. Decide explicitly whether to adopt them or keep your IdP and MDM, so ownership is not ambiguous.",
+      "severity": "Medium"
+    },
+    {
+      "title": "Verify vendor behavior",
+      "detail": "Integration catalogs and payroll coverage change by release and state. Confirm every Critical and High item with the vendor in writing.",
+      "severity": "Info"
+    }
+  ],
+  "discovery": [
+    "Workday: list all integration systems (EIBs, Core Connectors, Studio) with schedules and owners from the integrations report",
+    "Workday: export custom reports and calculated fields with last-run date and audience",
+    "Workday: export business process definitions and security groups with membership",
+    "Payroll: calendar of pay periods, tax filing dates, and year-end processing",
+    "Benefits: carrier list, file formats, plan year dates, open enrollment window",
+    "Finance: GL mapping, cost center list, and recurring HR-driven reports",
+    "Ask IT for every system that consumes employee data (IdP, ATS, LMS, expense, Slack)"
+  ],
+  "phases": [
+    {
+      "name": "Discover and decide",
+      "activities": [
+        "Inventory every consumer of employee data",
+        "Fix cutover quarter with Payroll and Finance",
+        "Decide history depth and archive approach",
+        "Record decisions as ADRs"
+      ]
+    },
+    {
+      "name": "Build and map",
+      "activities": [
+        "Configure org, jobs, comp, and security in the target",
+        "Build data mapping and ID continuity table",
+        "Rebuild integrations and reports in the target"
+      ]
+    },
+    {
+      "name": "Validate and parallel run",
+      "activities": [
+        "Load test data and reconcile",
+        "Run parallel payroll cycles until clean",
+        "Validate carrier files and accounting journals"
+      ]
+    },
+    {
+      "name": "Cut over and stabilize",
+      "activities": [
+        "Execute cutover on the agreed boundary",
+        "Hypercare through first full pay cycle and first close",
+        "Archive source and complete access review"
+      ]
+    }
+  ],
+  "cutover_checklist": [
+    "Payroll sign-off from two parallel runs with zero unexplained variance",
+    "Benefit carriers confirm accepted files",
+    "Open transactions and approvals drained in the source",
+    "Source system frozen to changes at an agreed time",
+    "Downstream feeds switched in dependency order",
+    "Security roles and compensation access reviewed",
+    "Employee and manager communication delivered"
+  ],
+  "rollback": [
+    "Before the point of no return (first live payroll), the source remains system of record and the target load is discarded",
+    "After first live payroll, rollback is a forward fix: define the manual payroll fallback and who authorizes it",
+    "Integrations: keep source feeds ready to re-enable for each consumer"
+  ],
+  "exit_criteria": [
+    "Two clean live pay cycles and one clean accounting close",
+    "All consumers receive data from the new source",
+    "Carrier reconciliations clean for one billing cycle",
+    "Source system archived read-only with documented retention owner"
+  ],
+  "stakeholders": [
+    "HR / People Ops",
+    "Payroll",
+    "Finance",
+    "Legal / compliance",
+    "IT / identity",
+    "Benefits broker",
+    "Executive sponsor"
+  ],
+  "decisions": [
+    {
+      "title": "Cutover boundary",
+      "options": [
+        "Year start",
+        "Quarter start",
+        "Mid-period with YTD import"
+      ]
+    },
+    {
+      "title": "History depth",
+      "options": [
+        "Full effective-dated history",
+        "Two years plus archive",
+        "Current state plus read-only archive"
+      ]
+    },
+    {
+      "title": "Adopt vendor IT products or keep existing IdP and MDM",
+      "options": [
+        "Keep existing",
+        "Adopt vendor identity/devices",
+        "Phase decision after HRIS stabilizes"
+      ]
+    }
+  ],
+  "totals": {
+    "items": 16,
+    "effort_days": 92.5,
+    "by_level": {
+      "Medium": 7,
+      "High": 6,
+      "Low": 2,
+      "Critical": 1
+    }
+  }
+}

@@ -1,0 +1,17 @@
+name,type,owner,users,criticality,depends_on,target_support,fixed_date,notes
+Org structure and cost centers,org_directory,HR Ops,1200,4,,native,,Supervisory orgs to departments
+Worker ID mapping,org_directory,HR Ops,1200,5,,native,,Source of truth for downstream keys
+Okta provisioning feed,idp_provisioning,IT,1200,5,Worker ID mapping,native,,Joiner mover leaver
+Greenhouse ATS,ats_recruiting,Talent,60,3,Worker ID mapping,native,,
+Expensify,expense_travel,Finance,700,3,Worker ID mapping,native,,
+Lattice performance,lms_performance,People,1200,3,Worker ID mapping,native,Mid-year review cycle,
+Learning platform,lms_performance,People,1200,2,Worker ID mapping,custom,,
+Headcount reporting,reporting_bi,Finance,25,4,Org structure and cost centers,custom,Month-end close,Calculated fields have no equivalent
+Workflow approvals,workflow_approvals,HR Ops,60,3,Org structure and cost centers,custom,,18 business processes
+Custom EIB to GL,custom_integration,Finance,10,4,Org structure and cost centers,custom,Month-end close,Owner unknown
+Time and absence,time_absence,HR Ops,1200,4,Worker ID mapping,native,,Accrual policies by region
+GL payroll journal,gl_accounting,Finance,15,5,Org structure and cost centers,native,Month-end close,
+Benefits carrier feeds,benefits_carrier,Benefits,1200,5,Worker ID mapping,custom,Open enrollment in November,Three carriers
+I-9 and personnel files,compliance_records,Legal,1200,4,,custom,,Retention applies after termination
+Payroll,payroll,Payroll,1200,5,Time and absence;GL payroll journal;Benefits carrier feeds,native,Payroll run on the 15th and last day,Two parallel runs required
+Legacy bonus tool,custom_integration,Finance,40,2,,none,,Vendor retired its connector

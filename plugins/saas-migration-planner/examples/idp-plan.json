@@ -1,0 +1,1020 @@
+{
+  "pack": "idp",
+  "title": "Identity provider migration",
+  "summary": "Moving workforce authentication and provisioning between identity providers (for example Entra ID to Okta, or Okta to Entra ID). The directory, the apps, and the devices all depend on it, so the inventory of connections is the plan.",
+  "source": "entra",
+  "target": "okta",
+  "generated": "2026-10-10",
+  "settings": {
+    "start": "2026-11-02",
+    "wave_size": 6,
+    "wave_weeks": 2,
+    "freezes": [
+      "2026-12-21:2027-01-04"
+    ]
+  },
+  "inventory_errors": [],
+  "cycles": [],
+  "items": [
+    {
+      "name": "HR to AD sync scripts",
+      "type": "service_principal_api",
+      "owner": "IT",
+      "users": 3,
+      "criticality": 4,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "Owner left the company",
+      "depends_on": [],
+      "risk": 54,
+      "level": "Medium",
+      "drivers": [
+        "high-risk integration type (Service principal / API / M2M auth)",
+        "business criticality 4/5",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 3.0,
+      "checks": [
+        "Owner identified for each app registration or service account",
+        "Secrets and certificates rotated into target, expiry dates recorded",
+        "Graph or directory API consumers re-pointed"
+      ],
+      "type_label": "Service principal / API / M2M auth",
+      "sequence": 3,
+      "dep_level": 0,
+      "wave": 1
+    },
+    {
+      "name": "Directory groups",
+      "type": "group_directory",
+      "owner": "IT",
+      "users": 1200,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Includes nested groups used for app access",
+      "depends_on": [],
+      "risk": 53,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 4/5",
+        "1,200 affected users",
+        "12 item(s) depend on it"
+      ],
+      "dependents": 12,
+      "effort_days": 2.0,
+      "checks": [
+        "Nested and dynamic groups flattened or rebuilt as rules",
+        "Source of truth for groups decided (HRIS, directory, or IdP)",
+        "Group-based license and app assignment mapped"
+      ],
+      "type_label": "Groups / directory sync",
+      "sequence": 1,
+      "dep_level": 0,
+      "wave": 1
+    },
+    {
+      "name": "Break-glass and global admins",
+      "type": "privileged_admin",
+      "owner": "Security",
+      "users": 6,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [],
+      "risk": 50,
+      "level": "Medium",
+      "drivers": [
+        "high-risk integration type (Admin / privileged access)",
+        "business criticality 5/5"
+      ],
+      "dependents": 0,
+      "effort_days": 1.5,
+      "checks": [
+        "Break-glass accounts remain outside the new IdP dependency",
+        "Admin role assignments reviewed, not copied blindly",
+        "Approval and PIM-style workflows replaced or documented"
+      ],
+      "type_label": "Admin / privileged access",
+      "sequence": 8,
+      "dep_level": 0,
+      "wave": 1
+    },
+    {
+      "name": "CI deploy pipelines",
+      "type": "service_principal_api",
+      "owner": "Platform",
+      "users": 12,
+      "criticality": 5,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "Use Entra app registrations and Graph API",
+      "depends_on": [],
+      "risk": 60,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Service principal / API / M2M auth)",
+        "business criticality 5/5",
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 3.0,
+      "checks": [
+        "Owner identified for each app registration or service account",
+        "Secrets and certificates rotated into target, expiry dates recorded",
+        "Graph or directory API consumers re-pointed"
+      ],
+      "type_label": "Service principal / API / M2M auth",
+      "sequence": 3,
+      "dep_level": 0,
+      "wave": 2
+    },
+    {
+      "name": "Jira and Confluence",
+      "type": "saml_sso",
+      "owner": "Eng Ops",
+      "users": 650,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 38,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 4/5"
+      ],
+      "dependents": 0,
+      "effort_days": 0.5,
+      "checks": [
+        "NameID format and attribute mapping preserved per app (UPN vs email breaks account linking)",
+        "Vendor supports swapping IdP metadata, entity ID, and signing certificate",
+        "Test login with pilot users before flipping"
+      ],
+      "type_label": "SAML SSO app",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Datadog",
+      "type": "saml_sso",
+      "owner": "SRE",
+      "users": 150,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 37,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 4/5"
+      ],
+      "dependents": 0,
+      "effort_days": 0.5,
+      "checks": [
+        "NameID format and attribute mapping preserved per app (UPN vs email breaks account linking)",
+        "Vendor supports swapping IdP metadata, entity ID, and signing certificate",
+        "Test login with pilot users before flipping"
+      ],
+      "type_label": "SAML SSO app",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Expensify",
+      "type": "oidc_sso",
+      "owner": "Finance",
+      "users": 700,
+      "criticality": 3,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 36,
+      "level": "Medium",
+      "drivers": [
+        "700 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 0.8,
+      "checks": [
+        "Client ID/secret and redirect URIs re-registered in target",
+        "Claims and scopes mapped (groups, email, sub identifier stays stable)",
+        "Token lifetime and refresh behavior compared"
+      ],
+      "type_label": "OIDC / OAuth SSO app",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Zoom",
+      "type": "saml_sso",
+      "owner": "IT",
+      "users": 1200,
+      "criticality": 3,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 34,
+      "level": "Low",
+      "drivers": [
+        "1,200 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 0.5,
+      "checks": [
+        "NameID format and attribute mapping preserved per app (UPN vs email breaks account linking)",
+        "Vendor supports swapping IdP metadata, entity ID, and signing certificate",
+        "Test login with pilot users before flipping"
+      ],
+      "type_label": "SAML SSO app",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Box",
+      "type": "saml_sso",
+      "owner": "IT",
+      "users": 900,
+      "criticality": 3,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 34,
+      "level": "Low",
+      "drivers": [
+        "900 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 0.5,
+      "checks": [
+        "NameID format and attribute mapping preserved per app (UPN vs email breaks account linking)",
+        "Vendor supports swapping IdP metadata, entity ID, and signing certificate",
+        "Test login with pilot users before flipping"
+      ],
+      "type_label": "SAML SSO app",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 2
+    },
+    {
+      "name": "Conditional Access policies",
+      "type": "conditional_access",
+      "owner": "Security",
+      "users": 1200,
+      "criticality": 5,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "23 policies today",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 70,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Conditional access / auth policy)",
+        "business criticality 5/5",
+        "1,200 affected users",
+        "target support: custom",
+        "3 item(s) depend on it"
+      ],
+      "dependents": 3,
+      "effort_days": 3.0,
+      "checks": [
+        "Each policy exported and mapped to a target authentication policy, with gaps listed",
+        "Named locations, risk signals, and device conditions reproduced or consciously dropped",
+        "Report-only or audit mode before enforcement"
+      ],
+      "type_label": "Conditional access / auth policy",
+      "sequence": 4,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Workday",
+      "type": "saml_sso",
+      "owner": "HR",
+      "users": 1200,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "Payroll run on the 15th and last day",
+      "notes": "",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 54,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 5/5",
+        "1,200 affected users",
+        "dated constraint: Payroll run on the 15th and last day"
+      ],
+      "dependents": 0,
+      "effort_days": 0.5,
+      "checks": [
+        "NameID format and attribute mapping preserved per app (UPN vs email breaks account linking)",
+        "Vendor supports swapping IdP metadata, entity ID, and signing certificate",
+        "Test login with pilot users before flipping"
+      ],
+      "type_label": "SAML SSO app",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Salesforce",
+      "type": "saml_sso",
+      "owner": "Sales Ops",
+      "users": 420,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "NameID is UPN today",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 45,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 5/5",
+        "1 item(s) depend on it"
+      ],
+      "dependents": 1,
+      "effort_days": 0.5,
+      "checks": [
+        "NameID format and attribute mapping preserved per app (UPN vs email breaks account linking)",
+        "Vendor supports swapping IdP metadata, entity ID, and signing certificate",
+        "Test login with pilot users before flipping"
+      ],
+      "type_label": "SAML SSO app",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "GitHub Enterprise",
+      "type": "saml_sso",
+      "owner": "Eng Ops",
+      "users": 380,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Org SSO enforced",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 43,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 5/5"
+      ],
+      "dependents": 0,
+      "effort_days": 0.5,
+      "checks": [
+        "NameID format and attribute mapping preserved per app (UPN vs email breaks account linking)",
+        "Vendor supports swapping IdP metadata, entity ID, and signing certificate",
+        "Test login with pilot users before flipping"
+      ],
+      "type_label": "SAML SSO app",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Slack",
+      "type": "saml_sso",
+      "owner": "IT",
+      "users": 1200,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 41,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 4/5",
+        "1,200 affected users",
+        "1 item(s) depend on it"
+      ],
+      "dependents": 1,
+      "effort_days": 0.5,
+      "checks": [
+        "NameID format and attribute mapping preserved per app (UPN vs email breaks account linking)",
+        "Vendor supports swapping IdP metadata, entity ID, and signing certificate",
+        "Test login with pilot users before flipping"
+      ],
+      "type_label": "SAML SSO app",
+      "sequence": 2,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Partner guests",
+      "type": "guest_b2b",
+      "owner": "Partnerships",
+      "users": 140,
+      "criticality": 2,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 40,
+      "level": "Medium",
+      "drivers": [
+        "target support: custom"
+      ],
+      "dependents": 0,
+      "effort_days": 2.2,
+      "checks": [
+        "External user population counted and owners assigned",
+        "Invitation and trust model decided",
+        "Partner apps that trust the old tenant notified"
+      ],
+      "type_label": "Guest / external identities",
+      "sequence": 6,
+      "dep_level": 1,
+      "wave": 3
+    },
+    {
+      "name": "Device compliance signal",
+      "type": "device_trust",
+      "owner": "Endpoint",
+      "users": 950,
+      "criticality": 4,
+      "target_support": "custom",
+      "fixed_date": "",
+      "notes": "Intune compliance feeds CA",
+      "depends_on": [
+        "Conditional Access policies"
+      ],
+      "risk": 61,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Device trust / compliance signal)",
+        "business criticality 4/5",
+        "950 affected users",
+        "target support: custom",
+        "1 item(s) depend on it"
+      ],
+      "dependents": 1,
+      "effort_days": 4.5,
+      "checks": [
+        "Compliance signal source (MDM) connected to the target IdP",
+        "Unmanaged device behavior decided",
+        "Hybrid-joined or Entra-joined Windows login behavior left unchanged in early waves"
+      ],
+      "type_label": "Device trust / compliance signal",
+      "sequence": 6,
+      "dep_level": 2,
+      "wave": 4
+    },
+    {
+      "name": "Microsoft 365 federation",
+      "type": "m365_federation",
+      "owner": "IT",
+      "users": 1200,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Exchange Online and Teams",
+      "depends_on": [
+        "MFA enrollment",
+        "Device compliance signal",
+        "Conditional Access policies"
+      ],
+      "risk": 59,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Microsoft 365 / domain federation)",
+        "business criticality 5/5",
+        "1,200 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 4.0,
+      "checks": [
+        "Entra tenant remains the Microsoft 365 directory; scope is the authentication handoff, not deletion",
+        "Federation flip affects whole domains: use a staged approach or test domain",
+        "Hybrid join, Seamless SSO, and mail client modern auth tested"
+      ],
+      "type_label": "Microsoft 365 / domain federation",
+      "sequence": 9,
+      "dep_level": 3,
+      "wave": 4
+    },
+    {
+      "name": "MFA enrollment",
+      "type": "mfa_authenticators",
+      "owner": "Security",
+      "users": 1200,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Authenticator app and FIDO2",
+      "depends_on": [
+        "Conditional Access policies"
+      ],
+      "risk": 54,
+      "level": "Medium",
+      "drivers": [
+        "business criticality 5/5",
+        "1,200 affected users",
+        "1 item(s) depend on it"
+      ],
+      "dependents": 1,
+      "effort_days": 3.0,
+      "checks": [
+        "Factors cannot be exported: plan re-enrollment campaign and helpdesk surge",
+        "FIDO2 keys and passkeys re-registered",
+        "Enrollment grace period and recovery path defined"
+      ],
+      "type_label": "MFA factors and passkeys",
+      "sequence": 5,
+      "dep_level": 2,
+      "wave": 4
+    },
+    {
+      "name": "Okta SCIM to Salesforce",
+      "type": "scim_provisioning",
+      "owner": "Sales Ops",
+      "users": 420,
+      "criticality": 5,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "Role mapping is custom",
+      "depends_on": [
+        "Salesforce"
+      ],
+      "risk": 53,
+      "level": "Medium",
+      "drivers": [
+        "high-risk integration type (SCIM / automated provisioning)",
+        "business criticality 5/5"
+      ],
+      "dependents": 0,
+      "effort_days": 1.5,
+      "checks": [
+        "Import and match existing app accounts BEFORE enabling push to avoid duplicates or mass deactivation",
+        "Only one system may provision an app at a time: schedule the handoff",
+        "Attribute and role mapping verified on a test user"
+      ],
+      "type_label": "SCIM / automated provisioning",
+      "sequence": 3,
+      "dep_level": 2,
+      "wave": 4
+    },
+    {
+      "name": "Okta SCIM to Slack",
+      "type": "scim_provisioning",
+      "owner": "IT",
+      "users": 1200,
+      "criticality": 4,
+      "target_support": "native",
+      "fixed_date": "",
+      "notes": "",
+      "depends_on": [
+        "Slack"
+      ],
+      "risk": 49,
+      "level": "Medium",
+      "drivers": [
+        "high-risk integration type (SCIM / automated provisioning)",
+        "business criticality 4/5",
+        "1,200 affected users"
+      ],
+      "dependents": 0,
+      "effort_days": 1.5,
+      "checks": [
+        "Import and match existing app accounts BEFORE enabling push to avoid duplicates or mass deactivation",
+        "Only one system may provision an app at a time: schedule the handoff",
+        "Attribute and role mapping verified on a test user"
+      ],
+      "type_label": "SCIM / automated provisioning",
+      "sequence": 3,
+      "dep_level": 2,
+      "wave": 4
+    },
+    {
+      "name": "Legacy intranet",
+      "type": "legacy_auth",
+      "owner": "IT",
+      "users": 800,
+      "criticality": 2,
+      "target_support": "none",
+      "fixed_date": "",
+      "notes": "Header-based auth through app proxy",
+      "depends_on": [
+        "Directory groups"
+      ],
+      "risk": 63,
+      "level": "High",
+      "drivers": [
+        "high-risk integration type (Legacy / header-based / LDAP / RADIUS)",
+        "800 affected users",
+        "target support: none"
+      ],
+      "dependents": 0,
+      "effort_days": 8.0,
+      "checks": [
+        "Decide replace, proxy (access gateway), or retire",
+        "LDAP/RADIUS interface stood up in target and tested",
+        "Network path and shared secrets re-issued"
+      ],
+      "type_label": "Legacy / header-based / LDAP / RADIUS",
+      "sequence": 7,
+      "dep_level": 1
+    }
+  ],
+  "waves": [
+    {
+      "number": 1,
+      "label": "Pilot",
+      "start": "2026-11-02",
+      "end": "2026-11-15",
+      "cutover": "2026-11-10",
+      "hypercare_until": "2026-11-17",
+      "shifted_for_freeze": false,
+      "shifted_for_anchor": false,
+      "anchored": [],
+      "items": [
+        "Directory groups",
+        "HR to AD sync scripts",
+        "Break-glass and global admins"
+      ],
+      "effort_days": 6.5,
+      "peak_risk": 54,
+      "gating": [],
+      "comms": [
+        {
+          "when": "2026-10-27",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2026-11-03",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2026-11-09",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2026-11-10",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2026-11-11",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2026-11-17",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "label": "Wave 2",
+      "start": "2026-11-16",
+      "end": "2026-11-29",
+      "cutover": "2026-11-24",
+      "hypercare_until": "2026-12-01",
+      "shifted_for_freeze": false,
+      "shifted_for_anchor": false,
+      "anchored": [],
+      "items": [
+        "CI deploy pipelines",
+        "Zoom",
+        "Box",
+        "Expensify",
+        "Datadog",
+        "Jira and Confluence"
+      ],
+      "effort_days": 5.8,
+      "peak_risk": 60,
+      "gating": [
+        "Owner sign-off and parallel/shadow run for CI deploy pipelines"
+      ],
+      "comms": [
+        {
+          "when": "2026-11-10",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2026-11-17",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2026-11-23",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2026-11-24",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2026-11-25",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2026-12-01",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "label": "Wave 3",
+      "start": "2026-11-30",
+      "end": "2026-12-13",
+      "cutover": "2026-12-08",
+      "hypercare_until": "2026-12-15",
+      "shifted_for_freeze": false,
+      "shifted_for_anchor": false,
+      "anchored": [],
+      "items": [
+        "Slack",
+        "GitHub Enterprise",
+        "Salesforce",
+        "Workday",
+        "Conditional Access policies",
+        "Partner guests"
+      ],
+      "effort_days": 7.2,
+      "peak_risk": 70,
+      "gating": [
+        "Owner sign-off and parallel/shadow run for Conditional Access policies"
+      ],
+      "comms": [
+        {
+          "when": "2026-11-24",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2026-12-01",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2026-12-07",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2026-12-08",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2026-12-09",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2026-12-15",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "label": "Final wave",
+      "start": "2027-01-11",
+      "end": "2027-01-24",
+      "cutover": "2027-01-19",
+      "hypercare_until": "2027-01-26",
+      "shifted_for_freeze": true,
+      "shifted_for_anchor": false,
+      "anchored": [],
+      "items": [
+        "Okta SCIM to Slack",
+        "Okta SCIM to Salesforce",
+        "MFA enrollment",
+        "Device compliance signal",
+        "Microsoft 365 federation"
+      ],
+      "effort_days": 14.5,
+      "peak_risk": 61,
+      "gating": [
+        "Owner sign-off and parallel/shadow run for Device compliance signal",
+        "Owner sign-off and parallel/shadow run for Microsoft 365 federation"
+      ],
+      "comms": [
+        {
+          "when": "2027-01-05",
+          "what": "Announce scope, date, and what users must do"
+        },
+        {
+          "when": "2027-01-12",
+          "what": "Reminder with instructions and helpdesk contact"
+        },
+        {
+          "when": "2027-01-18",
+          "what": "Final notice and go/no-go confirmed"
+        },
+        {
+          "when": "2027-01-19",
+          "what": "Cutover day: status channel updates"
+        },
+        {
+          "when": "2027-01-20",
+          "what": "Day-after check-in and known-issues note"
+        },
+        {
+          "when": "2027-01-26",
+          "what": "Close hypercare and publish wave results"
+        }
+      ]
+    }
+  ],
+  "needs_decision": [
+    {
+      "name": "Legacy intranet",
+      "why": "No target support: replace, retire, or build a workaround (record as an ADR)",
+      "risk": 63,
+      "users": 800
+    }
+  ],
+  "gotchas": [
+    {
+      "title": "NameID default differs",
+      "detail": "Entra commonly emits UPN while Okta defaults to email. Apps keyed on the old value create duplicate users or lock people out. Record the format per app.",
+      "severity": "High"
+    },
+    {
+      "title": "Conditional Access has no 1:1 export",
+      "detail": "Policies must be re-expressed as Okta authentication policies and Device Assurance rules. Inventory every policy and list what is dropped.",
+      "severity": "High"
+    },
+    {
+      "title": "Windows sign-in and join state",
+      "detail": "Entra-joined or hybrid-joined devices keep their join. Replacing Windows login with an Okta device-access product is a separate decision, so defer it from the first waves.",
+      "severity": "Medium"
+    },
+    {
+      "title": "App registrations used by automation",
+      "detail": "Graph API consumers, scripts, and CI pipelines use Entra app registrations that have no Okta equivalent and break silently.",
+      "severity": "High"
+    },
+    {
+      "title": "Passwords cannot be exported",
+      "detail": "Hashes do not move between IdPs. Plan delegated authentication against on-prem AD, a staged password reset, or passwordless enrollment before the cutover, and budget helpdesk volume for it.",
+      "severity": "High"
+    },
+    {
+      "title": "Two provisioners fighting over one app",
+      "detail": "If both IdPs push SCIM to the same app, one can deprovision accounts the other just created. Hand off one app at a time and import-match first.",
+      "severity": "Critical"
+    },
+    {
+      "title": "The old tenant does not disappear",
+      "detail": "Organizations on Microsoft 365 keep the Entra tenant as the Microsoft directory. The project replaces the primary authentication and app-access layer, and the scope must say so to avoid a false decommission date.",
+      "severity": "High"
+    },
+    {
+      "title": "Group nesting and dynamic rules do not port",
+      "detail": "Target group models may be flat. Nested membership that granted app access silently stops working after migration.",
+      "severity": "High"
+    },
+    {
+      "title": "New single point of failure",
+      "detail": "Everything now authenticates through one vendor. Keep break-glass admin paths that do not depend on the new IdP and document the outage runbook.",
+      "severity": "High"
+    },
+    {
+      "title": "Audit trail discontinuity",
+      "detail": "Sign-in logs live in two places during transition. Keep old logs for the retention period and route the new ones to the SIEM before first cutover; SOC 2 evidence spans both.",
+      "severity": "Medium"
+    },
+    {
+      "title": "Verify vendor behavior",
+      "detail": "Feature gaps and limits change by release. Confirm each Critical and High item against current vendor documentation before committing dates.",
+      "severity": "Info"
+    }
+  ],
+  "discovery": [
+    "Entra: export Enterprise Applications and App Registrations (portal CSV or Graph) with SSO type, assigned users, and last sign-in",
+    "Entra: pull 90 days of sign-in logs by application to find real usage and dead apps",
+    "Entra: export all Conditional Access policies, named locations, and authentication methods policy",
+    "Okta: export Applications, Groups, Group Rules, Policies, and System Log activity by app",
+    "Ask app owners and Finance (SaaS spend list) for apps that never touched the IdP",
+    "Search code and CI for client secrets, tenant IDs, and issuer URLs"
+  ],
+  "phases": [
+    {
+      "name": "Discover and decide",
+      "activities": [
+        "Build the integration inventory",
+        "Retire dead apps before migrating them",
+        "Decide MFA, device trust, and provisioning source-of-truth approach",
+        "Record decisions as ADRs"
+      ]
+    },
+    {
+      "name": "Build and mirror",
+      "activities": [
+        "Stand up target IdP, directory sync, and policies",
+        "Configure break-glass and logging to SIEM",
+        "Mirror group structure and test with IT pilot"
+      ]
+    },
+    {
+      "name": "Migrate in waves",
+      "activities": [
+        "Run waves in the order generated",
+        "Hold a go/no-go before each wave",
+        "Hypercare after every wave"
+      ]
+    },
+    {
+      "name": "Converge and retire",
+      "activities": [
+        "Remove old SSO trust and secrets per app",
+        "Close old provisioning connectors",
+        "Archive logs and update runbooks and audit evidence"
+      ]
+    }
+  ],
+  "cutover_checklist": [
+    "Go/no-go signed by wave owner and security",
+    "Pilot users confirmed working on the target before broad switch",
+    "App vendor contacted where IdP swap needs vendor action",
+    "Helpdesk briefed with a one-page FAQ and escalation path",
+    "Break-glass admin login verified outside the new IdP",
+    "Old IdP configuration exported and saved before any change",
+    "Monitoring on sign-in failure rate with an agreed rollback threshold"
+  ],
+  "rollback": [
+    "Per app: restore previous IdP metadata and certificate (kept from the pre-change export)",
+    "Per app: re-enable old provisioning only after disabling the new connector",
+    "Domain federation: documented revert command and who may run it",
+    "Rollback trigger: sign-in failure rate or helpdesk ticket threshold agreed in advance"
+  ],
+  "exit_criteria": [
+    "Zero sign-ins to the old IdP for 30 days except break-glass",
+    "All provisioning owned by a single system",
+    "MFA enrollment at target percentage with recovery tested",
+    "Audit evidence reviewed by the security/compliance owner"
+  ],
+  "stakeholders": [
+    "Security",
+    "IT / Helpdesk",
+    "App owners",
+    "HR (source of truth)",
+    "Compliance / audit",
+    "Executive sponsor"
+  ],
+  "decisions": [
+    {
+      "title": "Provisioning source of truth",
+      "options": [
+        "HRIS drives IdP",
+        "IdP drives apps from directory",
+        "Hybrid with explicit field ownership"
+      ]
+    },
+    {
+      "title": "Cutover model",
+      "options": [
+        "App-by-app phased",
+        "Group-by-group phased",
+        "Big bang by domain"
+      ]
+    },
+    {
+      "title": "Device trust approach",
+      "options": [
+        "MDM compliance signal",
+        "IdP-native device assurance",
+        "Defer to phase 2"
+      ]
+    }
+  ],
+  "totals": {
+    "items": 21,
+    "effort_days": 42.0,
+    "by_level": {
+      "Medium": 14,
+      "Low": 2,
+      "High": 5
+    }
+  }
+}

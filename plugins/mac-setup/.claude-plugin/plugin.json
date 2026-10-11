@@ -1,0 +1,10 @@
+{
+  "name": "mac-setup",
+  "version": "0.2.0",
+  "description": "Snapshots your Mac (Homebrew, App Store apps, VS Code extensions, dotfiles, macOS defaults, app settings) into a git-friendly folder with an idempotent bootstrap script, and re-syncs it on demand. Claude Code on a real Mac only.",
+  "author": {
+    "name": "Brandon Sexton",
+    "email": "bsexton@pm.me"
+  },
+  "license": "MIT"
+}

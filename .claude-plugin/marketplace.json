@@ -7,6 +7,7 @@
     { "name": "catch-me-up", "source": "./plugins/catch-me-up", "description": "Cross-app triage of what needs you across email, Slack, Jira, and more." },
     { "name": "transcript-processor", "source": "./plugins/transcript-processor", "description": "Turns meeting transcripts into 1:1 and team notes, action items, and callouts." },
     { "name": "architect-toolkit", "source": "./plugins/architect-toolkit", "description": "Architecture decision records with weighted scoring and sensitivity analysis, an adversarial pre-mortem, and a Well-Architected style review of Terraform and CloudFormation with an HTML report." },
-    { "name": "saas-migration-planner", "source": "./plugins/saas-migration-planner", "description": "Plans SaaS migrations (identity provider, HRIS, Apple MDM) from an integration inventory: risk-scored dependencies, cutover waves around freezes and payroll boundaries, rollback plans, and an HTML roadmap." }
+    { "name": "saas-migration-planner", "source": "./plugins/saas-migration-planner", "description": "Plans SaaS migrations (identity provider, HRIS, Apple MDM) from an integration inventory: risk-scored dependencies, cutover waves around freezes and payroll boundaries, rollback plans, and an HTML roadmap." },
+    { "name": "mac-setup", "source": "./plugins/mac-setup", "description": "Snapshots your Mac (Homebrew, App Store apps, dotfiles, macOS defaults, app settings) into a git-friendly folder with an idempotent bootstrap script, and re-syncs it on demand. Claude Code on a real Mac only." }
   ]
 }

@@ -1,0 +1,4 @@
+# Copy to ~/.config/mac-setup/config.yaml
+# Folder where the snapshot (Brewfile, dotfiles, bootstrap.sh, ...) is written.
+# Make it its own PRIVATE git repo: dotfiles and app settings are personal.
+setup_dir: ~/mac-setup

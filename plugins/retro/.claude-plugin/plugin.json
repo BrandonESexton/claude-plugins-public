@@ -1,0 +1,10 @@
+{
+  "name": "retro",
+  "version": "1.0.0",
+  "description": "End-of-session retrospective: finds corrections, repeated workflows, and gotchas in the conversation and proposes additions to CLAUDE.md, memory, or a new skill. Nothing is written without approval.",
+  "author": {
+    "name": "Brandon Sexton",
+    "email": "bsexton@pm.me"
+  },
+  "license": "MIT"
+}

@@ -1,6 +1,6 @@
 # Claude plugins for IT and engineering leaders
 
-Seven Claude plugins I built and used day to day: running a job search, grooming a Jira backlog and governing AI spend, triaging what needs me across email, Slack and Jira, turning meeting transcripts into notes and action items, making architecture decisions that hold up to review, planning SaaS platform migrations, and snapshotting a Mac into a restore script.
+Eight Claude plugins I built and used day to day: running a job search, grooming a Jira backlog and governing AI spend, triaging what needs me across email, Slack and Jira, turning meeting transcripts into notes and action items, making architecture decisions that hold up to review, planning SaaS platform migrations, snapshotting a Mac into a restore script, and turning each session's lessons into a better setup.
 
 They are written as Claude skills (Markdown instructions plus a small config file), so they run in Claude Code or Claude Cowork without any code to deploy. The exceptions are architect-toolkit, saas-migration-planner, and mac-setup, which ship small stdlib-only Python scripts so scoring and scanning are reproducible.
 
@@ -13,6 +13,7 @@ They are written as Claude skills (Markdown instructions plus a small config fil
 | [architect-toolkit](plugins/architect-toolkit) | Interviews you through an architecture decision, scores options with a reason for every score, stress-tests the winner with sensitivity analysis, runs an adversarial pre-mortem, and reviews Terraform and CloudFormation into an HTML report with evidence for every finding. |
 | [saas-migration-planner](plugins/saas-migration-planner) | Turns an integration inventory into a migration plan for identity provider (Entra/Okta), HRIS (Workday/Rippling), or Apple MDM (Jamf/Kandji) moves: risk-scored dependencies, cutover waves that respect freezes and payroll boundaries, rollback, comms calendar, and an HTML roadmap. |
 | [mac-setup](plugins/mac-setup) | Snapshots your Mac (Homebrew, App Store apps, dotfiles, macOS defaults, app settings) into a folder you keep in git, plus an idempotent bootstrap script for a new Mac. Re-run to update. **Claude Code on the Mac only; it cannot run in Cowork.** |
+| [retro](plugins/retro) | End-of-session retrospective. Finds your corrections, repeated workflows, and gotchas, then proposes additions to CLAUDE.md, memory, or a new skill. Proposes only; nothing is written without approval. |
 
 ## Design choices that run through all of them
 

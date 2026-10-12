@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Gateway Architecture Review</title><style>
+:root{--bg:#fff;--fg:#1a1d21;--mut:#5f6b7a;--card:#f5f7fa;--bd:#dde2e8;--r:#c62828;--o:#e65100;--y:#b58900;--b:#1565c0;--g:#2e7d32}
+@media(prefers-color-scheme:dark){:root{--bg:#12151a;--fg:#e8ecf1;--mut:#9aa7b5;--card:#1b2028;--bd:#2c3440;--r:#ef5350;--o:#ff9800;--y:#e0b400;--b:#64b5f6;--g:#66bb6a}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans-serif}
+main{max-width:880px;margin:0 auto;padding:24px 16px}h1{margin:0 0 4px}h2{margin-top:32px}
+.chip{display:inline-block;padding:2px 10px;border-radius:12px;margin:0 6px 6px 0;font-weight:600;font-size:13px;border:1px solid var(--bd)}
+.critical{--c:var(--r)}.high{--c:var(--o)}.medium{--c:var(--y)}.low{--c:var(--b)}.info{--c:var(--mut)}
+.chip{color:var(--c)}.row{display:grid;grid-template-columns:190px 1fr 36px;gap:10px;align-items:center;margin:6px 0}
+.bar{background:var(--card);border:1px solid var(--bd);height:12px;border-radius:6px;overflow:hidden}.bar i{display:block;height:100%}
+.g{background:var(--g)}.y{background:var(--y)}.r{background:var(--r)}
+.card{background:var(--card);border:1px solid var(--bd);border-left:4px solid var(--c);border-radius:6px;margin:8px 0;padding:8px 12px}
+summary{cursor:pointer;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}summary em{color:var(--mut);font-size:13px;margin-left:auto}
+.tag{color:var(--c);font-weight:700;font-size:12px;text-transform:uppercase}pre{overflow-x:auto;background:var(--bg);padding:8px;border-radius:4px;border:1px solid var(--bd)}
+.src{color:var(--mut);font-size:12px}table{border-collapse:collapse}td{padding:2px 14px 2px 0}
+@media(max-width:560px){.row{grid-template-columns:120px 1fr 30px}}
+</style><main><h1>AI Gateway Architecture Review</h1><p style="color:var(--mut)">12 findings. Scanner results are heuristic; High and Critical items should be confirmed in code.</p>
+<div><span class="chip critical">Critical 0</span><span class="chip high">High 1</span><span class="chip medium">Medium 5</span><span class="chip low">Low 4</span><span class="chip info">Info 2</span></div><h2>Pillar health</h2><div class="row"><span>Security</span><div class="bar"><i style="width:44%" class="r"></i></div><b>44</b></div><div class="row"><span>Reliability</span><div class="bar"><i style="width:88%" class="g"></i></div><b>88</b></div><div class="row"><span>Operational Excellence</span><div class="bar"><i style="width:100%" class="g"></i></div><b>100</b></div><div class="row"><span>Performance Efficiency</span><div class="bar"><i style="width:100%" class="g"></i></div><b>100</b></div><div class="row"><span>Cost Optimization</span><div class="bar"><i style="width:100%" class="g"></i></div><b>100</b></div><div class="row"><span>Sustainability</span><div class="bar"><i style="width:100%" class="g"></i></div><b>100</b></div><h2>Findings</h2><details class="card high"><summary><span class="tag">High</span>
+<b>Nothing forces callers to use the guardrail</b><em>Security / SEC-GOV-001</em></summary>
+<p><strong>Where:</strong> guardrail.tf:4 (aws_bedrock_guardrail.this)</p>
+<pre>Inventory is only aws_bedrock_guardrail and aws_bedrock_guardrail_version. No aws_iam_policy, no gateway, no SCP. Searched all .tf files for bedrock:GuardrailIdentifier: not present.</pre>
+<p><strong>Fix:</strong> Add an IAM policy (or SCP) that denies bedrock:InvokeModel* unless the bedrock:GuardrailIdentifier condition key matches this guardrail and version. Without it, any caller can skip the policy by not passing a guardrail ID. Opinion: High for production, Medium while this stays a prototype.</p>
+<p class="src">Source: review</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>PII and secrets coverage is thin for a corporate policy</b><em>Security / SEC-PII-001</em></summary>
+<p><strong>Where:</strong> guardrail.tf:41 (aws_bedrock_guardrail.this)</p>
+<pre>Only EMAIL, PHONE, US_SOCIAL_SECURITY_NUMBER, CREDIT_DEBIT_CARD_NUMBER, AWS_ACCESS_KEY are configured. AWS_ACCESS_KEY is blocked but AWS_SECRET_KEY is not.</pre>
+<p><strong>Fix:</strong> Add AWS_SECRET_KEY, PASSWORD, US_BANK_ACCOUNT_NUMBER, US_PASSPORT_NUMBER, NAME and ADDRESS as needed. Add regexes_config entries for non-AWS secrets (GitHub tokens, API keys, JWTs, private key headers).</p>
+<p class="src">Source: review</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>Description promises harmful content coverage, filters are partial</b><em>Security / SEC-CONTENT-001</em></summary>
+<p><strong>Where:</strong> guardrail.tf:13 (aws_bedrock_guardrail.this)</p>
+<pre>description says &#x27;PII, secrets, harmful content, prompt injection&#x27; but filters_config has only HATE, INSULTS, MISCONDUCT, PROMPT_ATTACK. SEXUAL and VIOLENCE are absent.</pre>
+<p><strong>Fix:</strong> Add SEXUAL and VIOLENCE filters, or reword the description to match what is enforced.</p>
+<p class="src">Source: review</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>No visibility into blocks or interventions</b><em>Operational excellence / OPS-OBS-001</em></summary>
+<p><strong>Where:</strong> guardrail.tf:4 (aws_bedrock_guardrail.this)</p>
+<pre>No aws_bedrock_model_invocation_logging_configuration, aws_cloudwatch_metric_alarm or log group in any .tf file.</pre>
+<p><strong>Fix:</strong> Enable model invocation logging to S3 or CloudWatch and alarm on guardrail intervention metrics. A policy layer you cannot observe cannot be tuned or audited.</p>
+<p class="src">Source: review</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>Version replacement can pull the pinned version out from under consumers</b><em>Reliability / REL-VER-001</em></summary>
+<p><strong>Where:</strong> guardrail.tf:106 (aws_bedrock_guardrail_version.this)</p>
+<pre>lifecycle { replace_triggered_by = [aws_bedrock_guardrail.this] } with no create_before_destroy. The comment says apps pin to a numbered version.</pre>
+<p><strong>Fix:</strong> Treat versions as immutable releases. Add create_before_destroy (or stop replacing and create new version resources per release) so a pinned version is never deleted mid-apply. Confidence moderate: depends on how consumers pin.</p>
+<p class="src">Source: review</p></details><details class="card medium"><summary><span class="tag">Medium</span>
+<b>Local state, no remote backend or locking</b><em>Operational excellence / OPS-STATE-001</em></summary>
+<p><strong>Where:</strong> versions.tf:1 (terraform)</p>
+<pre>terraform block has required_version and required_providers only, no backend block. terraform.tfstate and .backup sit in the working directory (gitignored, which is good).</pre>
+<p><strong>Fix:</strong> Use an S3 backend with use_lockfile = true (Terraform &gt;= 1.10 is already required) before anyone else touches this.</p>
+<p class="src">Source: review</p></details><details class="card low"><summary><span class="tag">Low</span>
+<b>README implies a long-lived IAM access key runs Terraform</b><em>Security / SEC-IAM-001</em></summary>
+<p><strong>Where:</strong> README:1 (n/a)</p>
+<pre>README: &#x27;When the project&#x27;s done, deactivate or delete the access key.&#x27;</pre>
+<p><strong>Fix:</strong> Use IAM Identity Center or an assumed role with short-lived credentials. Inference from one README line, so confirm how you actually authenticate.</p>
+<p class="src">Source: review</p></details><details class="card low"><summary><span class="tag">Low</span>
+<b>Guardrail not encrypted with a customer managed key</b><em>Security / SEC-KMS-001</em></summary>
+<p><strong>Where:</strong> guardrail.tf:4 (aws_bedrock_guardrail.this)</p>
+<pre>No kms_key_arn argument and no aws_kms_key in the module (grep for kms/encrypt returned nothing).</pre>
+<p><strong>Fix:</strong> Optional for a sandbox. For regulated data, set kms_key_arn to a CMK you own.</p>
+<p class="src">Source: review</p></details><details class="card low"><summary><span class="tag">Low</span>
+<b>Tagging standard is minimal</b><em>Operational excellence / OPS-TAG-001</em></summary>
+<p><strong>Where:</strong> versions.tf:15 (provider.aws)</p>
+<pre>default_tags has Project and ManagedBy only.</pre>
+<p><strong>Fix:</strong> Add Owner, Environment, CostCenter and DataClassification.</p>
+<p class="src">Source: review</p></details><details class="card low"><summary><span class="tag">Low</span>
+<b>Typo in the message users actually see</b><em>Operational excellence / OPS-TYPO-001</em></summary>
+<p><strong>Where:</strong> guardrail.tf:9 (aws_bedrock_guardrail.this)</p>
+<pre>blocked_input_messaging = &quot;Blocked by AI usage prolicy. ...&quot; (also &#x27;High ris&#x27; in a comment on line 58)</pre>
+<p><strong>Fix:</strong> Change &#x27;prolicy&#x27; to &#x27;policy&#x27;. Changing the message creates a new guardrail version on apply.</p>
+<p class="src">Source: review</p></details><details class="card info"><summary><span class="tag">Info</span>
+<b>Single region, no DR story</b><em>Reliability / REL-REGION-001</em></summary>
+<p><strong>Where:</strong> variables.tf:10 (var.region)</p>
+<pre>region default us-east-1, one provider block, no aliases.</pre>
+<p><strong>Fix:</strong> Guardrails are regional. If you adopt cross-region inference or a second region, deploy the guardrail there too. Fine for now.</p>
+<p class="src">Source: review</p></details><details class="card info"><summary><span class="tag">Info</span>
+<b>No recorded decisions</b><em>Governance / GOV-ADR-001</em></summary>
+<p><strong>Where:</strong> README:1 (n/a)</p>
+<pre>README is one line, no docs or ADR folder.</pre>
+<p><strong>Fix:</strong> Run adr-studio for the enforcement approach (IAM condition vs SCP vs an API gateway in front).</p>
+<p class="src">Source: review</p></details>
+<h2>Resource inventory</h2><table><tr><td>aws_bedrock_guardrail</td><td>1</td></tr><tr><td>aws_bedrock_guardrail_version</td><td>1</td></tr></table></main></html>

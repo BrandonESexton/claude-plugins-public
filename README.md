@@ -41,6 +41,16 @@ Claude Code:
 
 Claude Cowork: zip a plugin folder (for example `plugins/job-application`) and upload it. `mac-setup` is the exception: it must read your own machine, so it runs only in Claude Code on that Mac.
 
+### Download a single plugin (no marketplace)
+
+Every release has one zip per plugin and one per skill. The links below always point at the latest release.
+
+- Claude Cowork: upload `https://github.com/BrandonESexton/claude-plugins-public/releases/latest/download/<plugin>.zip`, for example [career-interview.zip](https://github.com/BrandonESexton/claude-plugins-public/releases/latest/download/career-interview.zip).
+- Claude Code, one session only: unzip it and run `claude --plugin-dir ./<plugin>`.
+- ChatGPT or other skill uploads: use `skill-<skill>.zip`, for example [skill-career-interview.zip](https://github.com/BrandonESexton/claude-plugins-public/releases/latest/download/skill-career-interview.zip).
+
+Build the zips yourself with `scripts/package.sh [plugin ...]` (output goes to `dist/`). Pushing a `v*` tag runs the release workflow, which builds and attaches them.
+
 ## Configuration
 
 Skills are plain Markdown, so there are no install-time variables. Each plugin ships a `config.example.yaml`. Copy it to `~/.config/<plugin-name>/config.yaml` and fill it in. Every skill reads that file at the start of a run, and if it is missing, runs a short setup interview and writes it for you. Nothing personal lives in the skill files.

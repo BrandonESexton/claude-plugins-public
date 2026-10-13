@@ -1,0 +1,26 @@
+name: Release plugin zips
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (for example v1.1.0)
+        required: true
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build zips
+        run: scripts/package.sh
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 \
+            && gh release upload "$TAG" dist/*.zip --clobber \
+            || gh release create "$TAG" dist/*.zip --title "$TAG" --generate-notes

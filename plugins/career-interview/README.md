@@ -111,9 +111,11 @@ The skill is the same folder in both. It is written to use the structured questi
 /plugin install career-interview@claude-plugins-public
 ```
 
-**Claude Cowork:** zip the `career-interview` folder and upload it as a plugin.
+**Claude Cowork:** upload [career-interview.zip](https://github.com/BrandonESexton/claude-plugins-public/releases/latest/download/career-interview.zip) as a plugin.
 
-**ChatGPT Work:** upload the `skills/career-interview` folder as a skill (the folder containing `SKILL.md` and `references/`). ChatGPT reads the same SKILL.md format. If your ChatGPT plan has no skills upload, paste the contents of `SKILL.md` into a Project's instructions and add the three `references/` files as Project files.
+**Without adding a marketplace:** unzip that file and run `claude --plugin-dir ./career-interview` in Claude Code for a single session.
+
+**ChatGPT Work:** download [skill-career-interview.zip](https://github.com/BrandonESexton/claude-plugins-public/releases/latest/download/skill-career-interview.zip) and upload it as a skill (the folder containing `SKILL.md` and `references/`). ChatGPT reads the same SKILL.md format. If your ChatGPT plan has no skills upload, paste the contents of `SKILL.md` into a Project's instructions and add the three `references/` files as Project files.
 
 **Any other assistant:** paste `SKILL.md` as the instructions, attach the references, and attach your resume.
 

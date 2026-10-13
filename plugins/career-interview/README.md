@@ -115,7 +115,25 @@ The skill is the same folder in both. It is written to use the structured questi
 
 **Without adding a marketplace:** unzip that file and run `claude --plugin-dir ./career-interview` in Claude Code for a single session.
 
-**ChatGPT Work:** download [skill-career-interview.zip](https://github.com/BrandonESexton/claude-plugins-public/releases/latest/download/skill-career-interview.zip) and upload it as a skill (the folder containing `SKILL.md` and `references/`). ChatGPT reads the same SKILL.md format. If your ChatGPT plan has no skills upload, paste the contents of `SKILL.md` into a Project's instructions and add the three `references/` files as Project files.
+### ChatGPT
+
+ChatGPT now bundles apps and skills into "plugins", and it reads the same SKILL.md format Claude does. There are three ways in, from simplest to most involved.
+
+**1. Install a single plugin (any account: web, desktop, mobile).** Applies if career-interview is listed in the Plugins Directory.
+1. Open [chatgpt.com/plugins](https://chatgpt.com/plugins), or click **Plugins** in the sidebar, or go to **Settings, then Plugins**.
+2. Select the plugin and review its skills and setup requirements. Watch for a "Desktop only" label.
+3. Click **Install plugin** (the + button). This plugin has no apps, so there is nothing to connect or sign in to.
+4. Use it in any chat. ChatGPT pulls it in when you ask to build a career file, or you can call it by typing `@` and the plugin name, or **+ then More**.
+
+**2. Not in the directory yet? Use the skill zip.** Download [skill-career-interview.zip](https://github.com/BrandonESexton/claude-plugins-public/releases/latest/download/skill-career-interview.zip) and upload it as a skill where your plan allows skill uploads. If it does not, create a ChatGPT Project, paste the contents of `SKILL.md` into the Project instructions, and add the three files in `references/` as Project files. Say "build my career file" and attach your resume.
+
+**3. Workspace admins: import a marketplace.** A marketplace is a JSON catalog in a GitHub repo that lists several plugins at once. It is an admin-only feature for a ChatGPT workspace and is not available on personal accounts.
+1. Go to the admin console at [admin.openai.com](https://admin.openai.com) and select your workspace.
+2. Open **Plugins**, then the **Marketplaces** tab.
+3. Import the marketplace from a public or private GitHub repository. ChatGPT syncs it daily. To force an update, open the marketplace and click **Sync now**. ("Refresh plugin list" only reloads the display and does not pull from GitHub.)
+4. Importing only makes the plugins available in your directory. Members still install the ones they want, and any app authorization is a separate step. This plugin has no apps to authorize.
+
+Note: this repo's `.claude-plugin/marketplace.json` is Claude's catalog format. Whether ChatGPT's marketplace import accepts it as-is has not been confirmed. If the import rejects it, use option 2 for a quick start.
 
 **Any other assistant:** paste `SKILL.md` as the instructions, attach the references, and attach your resume.
 

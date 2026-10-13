@@ -9,6 +9,7 @@
     { "name": "architect-toolkit", "source": "./plugins/architect-toolkit", "description": "Architecture decision records with weighted scoring and sensitivity analysis, an adversarial pre-mortem, and a Well-Architected style review of Terraform and CloudFormation with an HTML report." },
     { "name": "saas-migration-planner", "source": "./plugins/saas-migration-planner", "description": "Plans SaaS migrations (identity provider, HRIS, Apple MDM) from an integration inventory: risk-scored dependencies, cutover waves around freezes and payroll boundaries, rollback plans, and an HTML roadmap." },
     { "name": "mac-setup", "source": "./plugins/mac-setup", "description": "Snapshots your Mac (Homebrew, App Store apps, dotfiles, macOS defaults, app settings) into a git-friendly folder with an idempotent bootstrap script, and re-syncs it on demand. Claude Code on a real Mac only." },
+    { "name": "career-interview", "source": "./plugins/career-interview", "description": "Interviews you one question at a time from your current resume and compiles a career.md: metric-backed accomplishments, calibrated skills, STAR+R stories, and a target-role profile. Type pause anytime to save progress. Works in Claude and ChatGPT." },
     { "name": "retro", "source": "./plugins/retro", "description": "End-of-session retrospective that proposes CLAUDE.md, memory, or skill additions from your corrections, repeated workflows, and gotchas. Nothing is written without approval." }
   ]
 }

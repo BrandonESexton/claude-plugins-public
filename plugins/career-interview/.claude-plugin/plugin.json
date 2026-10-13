@@ -1,0 +1,10 @@
+{
+  "name": "career-interview",
+  "version": "0.1.0",
+  "description": "Interviews you one question at a time, starting from your current resume, and compiles a career.md: metric-backed accomplishments, calibrated skills, a STAR+R story bank, and a target-role profile that resume, cover letter, and interview-prep work can draw on. Works in Claude and ChatGPT.",
+  "author": {
+    "name": "Brandon Sexton",
+    "email": "bsexton@pm.me"
+  },
+  "license": "MIT"
+}

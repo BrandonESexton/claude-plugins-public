@@ -146,7 +146,7 @@
       "file": "applications/marcus-webb.md",
       "readable": true,
       "contacts": {
-        "name_guess": "# Marcus Webb",
+        "name_guess": "Marcus Webb",
         "emails": [
           "marcus.webb@example.com"
         ],

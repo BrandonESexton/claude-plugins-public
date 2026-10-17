@@ -4,7 +4,10 @@
   render_report.py --signals signals.json --evals evals.json --requirements requirements.json \
                    --out report.html [--title "..."] [--json scores.json]
   render_report.py ... [--csv shortlist.csv] [--pdf report.pdf] [--markdown summary.md]
-  render_report.py requirements-md requirements.json     chat-mode requirements review table
+  render_report.py welcome [--posting NAME] [--apps N]   chat card: step 1, what to send
+  render_report.py requirements-md REQ.json [--page review.html]   chat card: step 2, plus the interactive review page
+  render_report.py apply-changes REQ.json CHANGES|-       apply a reply from the review page (or written from chat)
+  render_report.py scan-md signals.json REQ.json          chat card: step 3, scan results
   render_report.py selftest
 
 The math lives here, not in the model:
@@ -770,32 +773,83 @@ def bar(score, width=10):
     return "\u2588" * n + "\u2591" * (width - n)
 
 
-def requirements_md(req):
-    """Chat-mode requirements review: a numbered table the user edits by reply."""
-    lines = [f"**{req.get('role', 'Role')}{', ' + req['company'] if req.get('company') else ''}: draft requirements**", "",
-             "| ID | Must-have | Requirement | Matches on |", "|---|---|---|---|"]
-    for r in req.get("requirements", []):
-        lines.append(f"| {r['id']} | {'yes' if r.get('must') else 'nice'} | {r['label']} | {', '.join(r.get('terms', [])[:8])} |")
+SHORT_DIM = {"must_have": "must", "experience": "experience", "impact": "impact", "learning_agility": "learning",
+             "work_style": "work style", "nice_to_have": "nice"}
+
+
+def _title(req):
+    return f"{req.get('role', 'Role')}{', ' + req['company'] if req.get('company') else ''}"
+
+
+def welcome_md(posting=None, apps=0):
+    """Chat card for Step 1: what the skill does and a checklist of what it still needs."""
+    box = lambda done: "[x]" if done else "[ ]"
+    lines = ["### Candidate Screen",
+             "Screens a stack of applications against a job posting: fit and learning agility scored with evidence, "
+             "fake and AI-gamed applications flagged, and a ranked report you can retune.", "",
+             "**Step 1 of 4 \u00b7 Send me**",
+             f"- {box(posting)} **Job posting:** a link, a file, or pasted text" + (f" (got: {posting})" if posting else ""),
+             f"- {box(apps)} **Applications:** attach the resumes (.pdf, .docx, .txt, .md, .html)" +
+             (f" (got {apps})" if apps else ""),
+             "- [ ] *Optional:* say `web checks ok` to let me look up employers for flagged candidates, and name any "
+             "legal requirement for the role (for example work authorization)", "",
+             "**Then:** 2 \u00b7 you approve the requirements \u2192 3 \u00b7 I scan and score \u2192 4 \u00b7 ranked results and report", "",
+             'Try: *"Screen these resumes against the attached posting."*']
+    return "\n".join(lines)
+
+
+def requirements_md(req, page=None):
+    """Chat card for Step 2: the drafted requirements, weights, and how to reply."""
+    reqs = req.get("requirements", [])
+    musts = sum(1 for r in reqs if r.get("must"))
+    lines = ["### Step 2 of 4 \u00b7 Review requirements",
+             f"**{_title(req)}** \u00b7 {musts} must-have{'s' if musts != 1 else ''} \u00b7 {len(reqs) - musts} nice-to-have", "",
+             "| ID | | Requirement | Matches on |", "|---|---|---|---|"]
+    for r in sorted(reqs, key=lambda r: not r.get("must")):
+        lines.append(f"| {r['id']} | {'**MUST**' if r.get('must') else 'nice'} | {r['label']} | {', '.join(r.get('terms', [])[:6])} |")
     w = {**DEFAULT_WEIGHTS, **req.get("weights", {})}
     th = {**DEFAULT_THRESHOLDS, **req.get("thresholds", {})}
-    lines += ["", "Weights: " + " \u00b7 ".join(f"{l} {w.get(k, 0)}" for k, l, _ in DIMENSIONS)
-              + f". Advance at {th['advance']}, Consider at {th['consider']}."]
+    lines += ["", "**Weights** " + " \u00b7 ".join(f"{l} {w.get(k, 0)}" for k, l, _ in DIMENSIONS),
+              f"**Advance at** {th['advance']} \u00b7 **Consider at** {th['consider']}"]
     if req.get("notes"):
-        lines += ["", "Notes:"] + [f"- {n}" for n in req["notes"]]
-    lines += ["", 'Reply with changes, for example "R5 to nice-to-have", "add Okta as a must-have", '
-              '"learning agility 25", "advance at 70", or "looks good".']
+        lines += [""] + [f"> {n}" for n in req["notes"]]
+    lines += ["", "**Your move**"]
+    if page:
+        lines.append(f"- Open **{Path(page).name}** to adjust with toggles and sliders, then paste the reply it gives you")
+    lines += ["- Or reply in words: `R5 nice` \u00b7 `R7 must` \u00b7 `remove R10` \u00b7 `add Okta admin, must` \u00b7 `learning 25` \u00b7 `advance 70`",
+              "- Or: `looks good`"]
+    return "\n".join(lines)
+
+
+def scan_md(signals, req):
+    """Chat card for Step 3: what the scan found, before any scoring."""
+    cands = signals.get("candidates", [])
+    n_req = len(req.get("requirements", []))
+    lines = ["### Step 3 of 4 \u00b7 Screening",
+             f"Read {len(cands)} application{'s' if len(cands) != 1 else ''}. Scoring each against the rubric next.", "",
+             "| Applicant | File | Years | Shown in a role | Integrity scan |", "|---|---|---|---|---|"]
+    for c in cands:
+        sev = [f.get("severity") for f in c.get("flags", [])]
+        top = next((f["title"] for f in c.get("flags", []) if f.get("severity") == "strong"), "") or \
+            next((f["title"] for f in c.get("flags", []) if f.get("severity") == "moderate"), "")
+        integ = ("**High risk** \u00b7 " + top if sev.count("strong") or sev.count("moderate") >= 3 else
+                 "Verify \u00b7 " + top if sev.count("moderate") or sev.count("weak") >= 3 else "Clear")
+        dem = sum(1 for v in (c.get("coverage") or {}).values() if v.get("status") == "demonstrated")
+        name = (c.get("contacts") or {}).get("name_guess") or c["id"]
+        lines.append(f"| {name} | {Path(c.get('file', '')).name} | {(c.get('timeline') or {}).get('years_total', 'n/a')} | "
+                     f"{dem}/{n_req} | {integ if c.get('readable', True) else 'Unreadable file'} |")
     return "\n".join(lines)
 
 
 def summary_md(signals, evals, req, files=None):
-    """Chat-mode results: ranked table with text score bars, integrity callouts, and file paths."""
+    """Chat card for Step 4: ranked table with score bars, integrity callouts, files, and suggested next replies."""
     cands = compute(signals, evals, req)[0]
     count = lambda r: sum(1 for c in cands if c["rec"] == r)
-    title = f"{req.get('role', 'Role')}{', ' + req['company'] if req.get('company') else ''}"
-    lines = [f"**{title}: {len(cands)} application{'s' if len(cands) != 1 else ''} screened**",
-             f"Advance {count('Advance')} \u00b7 Consider {count('Consider')} \u00b7 Verify first {count('Verify first')}"
-             f" \u00b7 Pass {count('Pass')}" + (f" \u00b7 Unreadable {count('Unreadable')}" if count("Unreadable") else ""), "",
-             "| # | Candidate | Fit | Recommendation | Integrity | Must-haves | Learning agility |", "|---|---|---|---|---|---|---|"]
+    lines = ["### Step 4 of 4 \u00b7 Results",
+             f"**{_title(req)}** \u00b7 {len(cands)} application{'s' if len(cands) != 1 else ''}",
+             f"Advance **{count('Advance')}** \u00b7 Consider **{count('Consider')}** \u00b7 Verify first **{count('Verify first')}**"
+             f" \u00b7 Pass **{count('Pass')}**" + (f" \u00b7 Unreadable **{count('Unreadable')}**" if count("Unreadable") else ""), "",
+             "| # | Candidate | Fit | Recommendation | Integrity | Must-haves | Learning |", "|---|---|---|---|---|---|---|"]
     for i, c in enumerate(cands, 1):
         la = next((d["used"] for d in c["dims"] if d["key"] == "learning_agility"), None)
         lines.append(f"| {i} | **{c['name']}** | `{bar(c['score'])}` {c['score']} | {c['rec']} | {c['tier']} | "
@@ -818,8 +872,198 @@ def summary_md(signals, evals, req, files=None):
         lines += ["", f"{unv} evidence quote(s) could not be found in the application text and were not counted."]
     if files:
         lines += ["", "**Files**"] + [f"- {k}: `{v}`" for k, v in files.items()]
-        lines.append("Open the HTML report to adjust weights and must-haves live and compare any two candidates.")
+        lines.append("The HTML report retunes live (weights, thresholds, must-haves) and compares any two candidates.")
+    a, b = (cands[0]["name"].split()[0], cands[1]["name"].split()[0]) if len(cands) > 1 else ("1", "2")
+    flag_name = flagged[0]["name"].split()[0] if flagged else None
+    lines += ["", "**Next** \u00b7 reply with " + " \u00b7 ".join(
+        [f"`compare {a} and {b}`", "`learning 25`", "`R5 nice`"] + ([f"`{flag_name}'s flags`"] if flag_name else [])
+        + ["`questions for " + a + "`", "`pdf`"])]
     return "\n".join(lines)
+
+
+# --------------------------------------------------------------------------- requirement changes (chat mode)
+
+CHANGES_HEADER = "Requirement changes (Candidate Screen)"
+
+
+def _dim_key(word):
+    word = word.strip().lower().replace("-", " ").replace("_", " ")
+    for k, short in SHORT_DIM.items():
+        if word in (short, k.replace("_", " "), dict((kk, l.lower()) for kk, l, _ in DIMENSIONS)[k]):
+            return k
+    return None
+
+
+def apply_changes(req, text):
+    """Apply a changes block (from the review page, or written by Claude from a chat reply). Returns (req, changes)."""
+    req = json.loads(json.dumps(req))
+    reqs = req.setdefault("requirements", [])
+    ids = {r["id"]: r for r in reqs}
+    next_id = 1 + max([int(m.group(1)) for r in reqs for m in [re.match(r"R(\d+)$", r["id"])] if m] or [0])
+    done, errors = [], []
+    t = text.strip()
+    if re.fullmatch(r"(?i)looks? good\.?|lgtm|approve[d]?|no changes", t):
+        return req, ["no changes"]
+    for raw in t.splitlines():
+        line = raw.strip().lstrip("-* ").strip()
+        if not line or line.startswith(CHANGES_HEADER) or ":" not in line:
+            continue
+        key, val = (x.strip() for x in line.split(":", 1))
+        key = key.lower()
+        if key == "must":
+            want = {x.strip().upper() for x in re.split(r"[,\s]+", val) if x.strip()}
+            bad = want - set(ids)
+            if bad:
+                errors.append(f"unknown requirement id(s): {', '.join(sorted(bad))}")
+            for r in reqs:
+                if bool(r.get("must")) != (r["id"] in want):
+                    r["must"] = r["id"] in want
+                    done.append(f"{r['id']} {r['label']}: {'must-have' if r['must'] else 'nice-to-have'}")
+        elif key == "remove":
+            for x in re.split(r"[,\s]+", val):
+                x = x.strip().upper()
+                if x in ids:
+                    reqs.remove(ids.pop(x))
+                    done.append(f"removed {x}")
+                elif x:
+                    errors.append(f"cannot remove unknown id {x}")
+        elif key == "add":
+            parts = [x.strip() for x in val.split("|")]
+            if not parts[0]:
+                errors.append("add needs a label")
+                continue
+            must = len(parts) > 1 and parts[1].lower().startswith("must")
+            terms = [x.strip() for x in parts[2].split(",") if x.strip()] if len(parts) > 2 else []
+            r = {"id": f"R{next_id}", "label": parts[0], "terms": terms, "must": must, "text": parts[0]}
+            next_id += 1
+            reqs.append(r)
+            ids[r["id"]] = r
+            done.append(f"added {r['id']} {r['label']} ({'must-have' if must else 'nice-to-have'})")
+        elif key == "weights":
+            w = req.setdefault("weights", dict(DEFAULT_WEIGHTS))
+            for m in re.finditer(r"([A-Za-z_ -]+?)\s*[=:]?\s*(\d+)", val):
+                k = _dim_key(m.group(1))
+                if k is None:
+                    errors.append(f"unknown weight {m.group(1).strip()}")
+                elif w.get(k) != int(m.group(2)):
+                    done.append(f"{dict((kk, l) for kk, l, _ in DIMENSIONS)[k]} {w.get(k, DEFAULT_WEIGHTS[k])} \u2192 {m.group(2)}")
+                    w[k] = int(m.group(2))
+        elif key == "thresholds":
+            th = req.setdefault("thresholds", dict(DEFAULT_THRESHOLDS))
+            for m in re.finditer(r"(advance|consider)\s*[=:]?\s*(\d+)", val, re.I):
+                k = m.group(1).lower()
+                if th.get(k) != int(m.group(2)):
+                    done.append(f"{k.title()} at {m.group(2)}")
+                    th[k] = max(0, min(100, int(m.group(2))))
+        else:
+            errors.append(f"unknown line: {raw.strip()}")
+    if errors:
+        raise ValueError("; ".join(errors))
+    return req, done or ["no changes"]
+
+
+REVIEW_JS = r"""
+(function(){
+var D=JSON.parse(document.getElementById('rv-data').textContent);
+var S={must:{},removed:{},added:[],w:Object.assign({},D.weights),t:Object.assign({},D.thresholds)};
+D.reqs.forEach(function(r){S.must[r.id]=!!r.must});
+function esc(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function rows(){var h='';D.reqs.forEach(function(r){var rm=S.removed[r.id];
+  h+='<tr class="'+(rm?'rm':'')+'"><td class="id">'+esc(r.id)+'</td><td><button type="button" class="mt" data-id="'+esc(r.id)+'" aria-pressed="'+(S.must[r.id]?'true':'false')+'"'+(rm?' disabled':'')+'>'+(S.must[r.id]?'MUST':'nice')+'</button></td>'+
+  '<td><b>'+esc(r.label)+'</b><div class="terms">'+esc((r.terms||[]).join(', '))+'</div></td>'+
+  '<td><button type="button" class="x" data-rm="'+esc(r.id)+'" title="'+(rm?'Restore':'Remove')+'">'+(rm?'Restore':'Remove')+'</button></td></tr>'});
+  S.added.forEach(function(a,i){h+='<tr class="new"><td class="id">new</td><td><button type="button" class="mt" data-add="'+i+'" aria-pressed="'+(a.must?'true':'false')+'">'+(a.must?'MUST':'nice')+'</button></td>'+
+  '<td><b>'+esc(a.label)+'</b><div class="terms">'+esc(a.terms)+'</div></td><td><button type="button" class="x" data-rmadd="'+i+'">Remove</button></td></tr>'});
+  document.getElementById('rv-rows').innerHTML=h;
+  document.querySelectorAll('.mt[data-id]').forEach(function(b){b.onclick=function(){S.must[b.dataset.id]=!S.must[b.dataset.id];upd()}});
+  document.querySelectorAll('.mt[data-add]').forEach(function(b){b.onclick=function(){var a=S.added[+b.dataset.add];a.must=!a.must;upd()}});
+  document.querySelectorAll('[data-rm]').forEach(function(b){b.onclick=function(){S.removed[b.dataset.rm]=!S.removed[b.dataset.rm];upd()}});
+  document.querySelectorAll('[data-rmadd]').forEach(function(b){b.onclick=function(){S.added.splice(+b.dataset.rmadd,1);upd()}})}
+function out(){var L=[],mustNow=D.reqs.filter(function(r){return !S.removed[r.id]&&S.must[r.id]}).map(function(r){return r.id});
+  var mustOrig=D.reqs.filter(function(r){return !S.removed[r.id]&&r.must}).map(function(r){return r.id});
+  if(mustNow.join()!==mustOrig.join())L.push('must: '+mustNow.join(', '));
+  var rm=Object.keys(S.removed).filter(function(k){return S.removed[k]});if(rm.length)L.push('remove: '+rm.join(', '));
+  S.added.forEach(function(a){L.push('add: '+a.label.replace(/[|\n]/g,' ')+' | '+(a.must?'must':'nice')+' | '+a.terms.replace(/[|\n]/g,' '))});
+  var wc=D.dims.filter(function(d){return +S.w[d.key]!==+D.weights[d.key]});
+  if(wc.length)L.push('weights: '+D.dims.map(function(d){return d.short+' '+S.w[d.key]}).join(', '));
+  if(+S.t.advance!==+D.thresholds.advance||+S.t.consider!==+D.thresholds.consider)L.push('thresholds: advance '+S.t.advance+', consider '+S.t.consider);
+  return L.length?D.header+'\n'+L.join('\n'):'looks good'}
+function upd(){rows();D.dims.forEach(function(d){document.getElementById('v-'+d.key).textContent=S.w[d.key]});
+  var o=out();document.getElementById('rv-out').value=o;var n=o==='looks good'?0:o.split('\n').length-1;
+  document.getElementById('rv-count').textContent=n?n+' change'+(n>1?'s':''):'No changes yet';
+  document.getElementById('rv-copy').textContent=n?'Copy my changes':'Copy "looks good"';
+  var musts=D.reqs.filter(function(r){return !S.removed[r.id]&&S.must[r.id]}).length+S.added.filter(function(a){return a.must}).length;
+  document.getElementById('rv-musts').textContent=musts+' must-have'+(musts===1?'':'s')}
+document.querySelectorAll('input[type=range]').forEach(function(i){i.oninput=function(){S.w[i.dataset.k]=+i.value;upd()}});
+['advance','consider'].forEach(function(k){var i=document.getElementById('t-'+k);i.oninput=function(){var v=parseInt(i.value,10);if(!isNaN(v)){S.t[k]=Math.max(0,Math.min(100,v));upd()}}});
+document.getElementById('rv-add').onclick=function(){var l=document.getElementById('a-label'),t=document.getElementById('a-terms'),m=document.getElementById('a-must');
+  if(!l.value.trim()){l.focus();return}S.added.push({label:l.value.trim(),terms:t.value.trim(),must:m.checked});l.value='';t.value='';m.checked=false;upd()};
+document.getElementById('rv-copy').onclick=function(){var ta=document.getElementById('rv-out'),msg=document.getElementById('rv-msg');
+  function ok(){msg.textContent='Copied. Paste it into the chat to continue.';msg.className='ok'}
+  function manual(){ta.focus();ta.select();msg.textContent='Selected. Press Cmd+C (or Ctrl+C), then paste it into the chat.';msg.className='warn'}
+  try{if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(ta.value).then(ok,function(){manual();try{document.execCommand('copy')&&ok()}catch(e){}})}
+  else{manual();if(document.execCommand('copy'))ok()}}catch(e){manual()}};
+upd();
+})();
+"""
+
+
+def review_page(req):
+    """Standalone Step 2 page: toggle must-haves, add or remove requirements, set weights; copy a reply for the chat."""
+    reqs = req.get("requirements", [])
+    w = {**DEFAULT_WEIGHTS, **req.get("weights", {})}
+    th = {**DEFAULT_THRESHOLDS, **req.get("thresholds", {})}
+    data = {"reqs": [{"id": r["id"], "label": r["label"], "terms": r.get("terms", [])[:8], "must": bool(r.get("must"))} for r in reqs],
+            "weights": w, "thresholds": th, "header": CHANGES_HEADER,
+            "dims": [{"key": k, "label": l, "short": SHORT_DIM[k]} for k, l, _ in DIMENSIONS]}
+    sliders = "".join(f'<div class="tw"><label for="w-{k}">{esc(l)}<output id="v-{k}">{w[k]}</output></label>'
+                      f'<input type="range" id="w-{k}" data-k="{k}" min="0" max="50" step="5" value="{w[k]}"></div>'
+                      for k, l, _ in DIMENSIONS)
+    notes = "".join(f"<li>{esc(n)}</li>" for n in req.get("notes", []))
+    return f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Review requirements</title><style>{CSS}
+.rv{{max-width:980px}}.steps{{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding:0;list-style:none}}
+.steps li{{font-size:12px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.14);color:rgba(255,255,255,.8)}}.steps li.on{{background:#fff;color:#0d366b;font-weight:700}}
+.rvt{{width:100%}}.rvt td{{padding:9px 8px;vertical-align:middle}}.rvt .id{{color:var(--muted);font-size:12px;width:40px}}
+.rvt .terms{{font-size:12px;color:var(--muted);margin-top:2px}}.rvt tr.rm b,.rvt tr.rm .terms{{text-decoration:line-through;opacity:.5}}
+.rvt tr.new{{background:color-mix(in srgb,var(--series) 8%,transparent)}}
+.rvt .mt{{min-width:62px}}.rvt .mt[aria-pressed="true"]:before{{content:""}}
+.x{{font:inherit;font-size:12px;border:1px solid var(--border);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:3px 10px;cursor:pointer}}
+.addrow{{display:grid;grid-template-columns:1.2fr 1.6fr auto auto;gap:8px;align-items:center;margin-top:10px}}
+.addrow input[type=text]{{font:inherit;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--page);color:var(--ink)}}
+@media(max-width:700px){{.addrow{{grid-template-columns:1fr}}}}
+.reply{{position:sticky;bottom:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-top:16px;box-shadow:0 -6px 24px rgba(0,0,0,.12)}}
+.reply textarea{{width:100%;min-height:86px;font:12px/1.5 ui-monospace,Menlo,monospace;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--page);color:var(--ink);resize:vertical}}
+.reply .rbar{{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}}
+.big{{font:inherit;font-weight:700;background:var(--series);color:#fff;border:0;border-radius:10px;padding:9px 16px;cursor:pointer}}
+#rv-msg.ok{{color:var(--good-ink)}}#rv-msg.warn{{color:var(--warn-ink)}}
+</style></head><body>
+<header class="hero" style="padding:28px 0 64px"><div class="wrap rv">
+  <p class="eyebrow">Candidate screen \u00b7 step 2 of 4</p><h1>Review requirements</h1>
+  <p>{esc(_title(req))}. Toggle must-haves, remove or add requirements, and set the weights. Then copy your reply into the chat.</p>
+  <ol class="steps"><li>1 \u00b7 Posting and resumes</li><li class="on">2 \u00b7 Requirements</li><li>3 \u00b7 Screening</li><li>4 \u00b7 Results</li></ol>
+</div></header>
+<main class="wrap rv">
+  <div class="panel" style="margin-top:-40px">
+    {f'<div class="notes" style="margin-bottom:10px"><b>Notes from Claude</b><ul class="small">{notes}</ul></div>' if notes else ''}
+    <h4>Requirements <span class="muted small" id="rv-musts"></span></h4>
+    <table class="rvt"><tbody id="rv-rows"></tbody></table>
+    <div class="addrow"><input type="text" id="a-label" placeholder="Add a requirement, e.g. Okta administration">
+      <input type="text" id="a-terms" placeholder="Words to match, comma separated (optional)">
+      <label class="small"><input type="checkbox" id="a-must"> must-have</label><button type="button" class="x" id="rv-add">Add</button></div>
+  </div>
+  <div class="panel" style="margin-top:14px"><h4>Weights</h4><div class="sliders">{sliders}</div>
+    <h4>Thresholds</h4><div class="thr"><label>Advance at <input type="number" id="t-advance" min="0" max="100" value="{th["advance"]}"></label>
+    <label>Consider at <input type="number" id="t-consider" min="0" max="100" value="{th["consider"]}"></label></div>
+    <p class="small muted">Weights are normalized, so they do not need to add up to 100. Integrity is rated separately and never weighted.</p></div>
+  <div class="reply"><div class="rbar"><b>Your reply</b><span class="muted small" id="rv-count"></span>
+    <button type="button" class="big" id="rv-copy" style="margin-left:auto">Copy my changes</button></div>
+    <textarea id="rv-out" readonly aria-label="Reply to paste into the chat"></textarea><p id="rv-msg" class="small"></p></div>
+</main>
+<script type="application/json" id="rv-data">{json.dumps(data).replace("<", "\\u003c")}</script>
+<script>{REVIEW_JS}</script>
+</body></html>'''
 
 
 def render(signals, evals, req, title=None):
@@ -939,7 +1183,23 @@ def selftest():
     check("</script><script>" not in out.split('id="cs-data">')[1].split("</script>")[0] + "x", "embedded data cannot close its script tag")
     md = summary_md(sig, ev, req)
     check("| 1 | **A** |" in md and "\u2588" in md and "Verify first" in md, "chat summary ranks with score bars")
-    check("| R1 | yes | Kubernetes |" in requirements_md(req), "chat requirements table lists must-haves")
+    check("| R1 | **MUST** | Kubernetes |" in requirements_md(req), "chat requirements card lists must-haves")
+    req2 = {"role": "T", "requirements": [{"id": "R1", "label": "K8s", "must": True}, {"id": "R2", "label": "Go", "must": False}]}
+    new, done = apply_changes(req2, CHANGES_HEADER + "\nmust: R2\nremove: R1\nadd: Okta admin | must | Okta, SSO\n"
+                              "weights: must 30, experience 25, impact 15, learning 25, work style 5, nice 10\nthresholds: advance 65, consider 55")
+    got = {r["id"]: r["must"] for r in new["requirements"]}
+    check(got == {"R2": True, "R3": True} and new["weights"]["learning_agility"] == 25 and new["thresholds"]["advance"] == 65,
+          "apply-changes: must, remove, add, weights, thresholds")
+    check(apply_changes(req2, "looks good")[1] == ["no changes"], "apply-changes: looks good is a no-op")
+    try:
+        apply_changes(req2, "must: R9")
+        check(False, "apply-changes rejects unknown ids")
+    except ValueError:
+        check(True, "apply-changes rejects unknown ids")
+    page = review_page(req2)
+    check('id="rv-copy"' in page and "</script><script>" not in page.split('id="rv-data">')[1].split("</script>")[0] + "x",
+          "review page renders with a safe data block")
+    check("Step 1 of 4" in welcome_md() and "[x]" in welcome_md("posting.pdf", 3), "welcome card checklist")
     check('id="tune"' in out and '"orig"' in out, "report carries the live tuning panel and its data")
     print("all passed" if ok else "FAILURES")
     return 0 if ok else 1
@@ -948,8 +1208,39 @@ def selftest():
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "selftest":
         sys.exit(selftest())
-    if len(sys.argv) > 2 and sys.argv[1] == "requirements-md":
-        print(requirements_md(json.loads(Path(sys.argv[2]).read_text())))
+    cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    if cmd == "welcome":
+        w = argparse.ArgumentParser(prog="render_report.py welcome")
+        w.add_argument("--posting", help="short name of the posting already received")
+        w.add_argument("--apps", type=int, default=0, help="number of applications already received")
+        o = w.parse_args(sys.argv[2:])
+        print(welcome_md(o.posting, o.apps))
+        return
+    if cmd == "requirements-md":
+        r = argparse.ArgumentParser(prog="render_report.py requirements-md")
+        r.add_argument("requirements")
+        r.add_argument("--page", help="also write the interactive review page here")
+        o = r.parse_args(sys.argv[2:])
+        req = json.loads(Path(o.requirements).read_text())
+        if o.page:
+            Path(o.page).write_text(review_page(req))
+        print(requirements_md(req, o.page))
+        return
+    if cmd == "apply-changes":
+        r = argparse.ArgumentParser(prog="render_report.py apply-changes")
+        r.add_argument("requirements")
+        r.add_argument("changes", help="file with the reply, or - for stdin")
+        o = r.parse_args(sys.argv[2:])
+        text = sys.stdin.read() if o.changes == "-" else Path(o.changes).read_text()
+        try:
+            new, done = apply_changes(json.loads(Path(o.requirements).read_text()), text)
+        except ValueError as e:
+            sys.exit(f"not applied: {e}")
+        Path(o.requirements).write_text(json.dumps(new, indent=2) + "\n")
+        print("applied: " + "; ".join(done))
+        return
+    if cmd == "scan-md":
+        print(scan_md(json.loads(Path(sys.argv[2]).read_text()), json.loads(Path(sys.argv[3]).read_text())))
         return
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--signals", required=True)

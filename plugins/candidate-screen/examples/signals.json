@@ -326,7 +326,7 @@
       "file": "applications/dev-patel.md",
       "readable": true,
       "contacts": {
-        "name_guess": "# Dev Patel",
+        "name_guess": "Dev Patel",
         "emails": [
           "dev.patel@example.com"
         ],

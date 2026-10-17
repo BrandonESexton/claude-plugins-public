@@ -42,7 +42,7 @@ Candidate Screen handles both. It scores only what the application can prove, gi
 | **Tailored interview questions** | 4 to 6 per candidate: the biggest gap, learning agility, work style, a depth check on the strongest claim, and one per integrity flag. |
 | **Exports** | Print-ready PDF with every candidate expanded, interactive HTML, and a ranked shortlist CSV for your spreadsheet or ATS. Save to any folder with one click. |
 | **Fairness guardrails** | A binding "never scored" list: name, age or graduation year, gender, national origin, school prestige, accent, non-US education, employment gaps, and more. |
-| **Works in chat too** | In Claude Cowork, or if you prefer the terminal, the same flow runs in chat with a numbered requirements table you edit by reply and a ranked results table with score bars. |
+| **Works in chat too** | In Claude Cowork, or if you prefer the terminal, the same flow runs as four step cards, with a requirements review page (toggles, sliders, copy your reply) and a ranked results card with score bars and suggested next replies. |
 | **Private by design** | Runs on 127.0.0.1 with a per-session token. Files stay in a folder next to your resumes. No API key, no upload, no cloud storage. |
 | **Reads what recruiters get** | PDF, Word (.docx), text, Markdown, and HTML, including PDFs whose layout wraps dates across lines. |
 
@@ -134,12 +134,109 @@ The browser app is a small server on `127.0.0.1`, so it only opens when Claude r
 | | Claude Code (terminal or IDE, on your machine) | Claude Cowork |
 |---|---|---|
 | Browser app (drag and drop, weight sliders, live progress) | Yes, opens automatically | No: Cowork runs Claude in a sandbox your browser cannot reach |
-| Requirements review | In the app | In chat: a numbered table you edit by reply ("R5 to nice-to-have", "learning agility 25") |
+| Requirements review | In the app | A review page with toggles and sliders that gives you a reply to paste, or a card you answer in words ("R5 nice", "learning 25") |
 | Interactive report (live weights, must-have toggles, compare) | Yes | Yes |
 | Scoring, learning agility, fraud checks, interview questions | Yes | Yes, identical |
-| Results in chat | Summary in chat, full report in the app | A ranked table with score bars, integrity callouts, and file links |
+| Chat experience | Short updates; the app does the heavy lifting | Four step cards (welcome checklist, requirements, scan, ranked results with score bars) with suggested replies |
 | Report, PDF, and CSV | Yes, plus Save to... and Show in Finder | Yes, as files you download from Cowork |
 | Brief employer web checks | Yes, if you allow them | Yes, if you allow them |
+
+### What chat mode looks like
+
+Chat mode is not a wall of prose. Every step is a fixed **card**, printed by the same scripts each time so it always looks the same: a welcome card with a checklist, a requirements card, a scan card, and a results card with score bars and suggested next replies.
+
+For the requirements step there is also a **review page**: an HTML file with must-have toggles, remove and add, weight sliders, and thresholds. Click **Copy my changes** and paste the reply into the chat. A script applies it exactly, so nothing is lost in translation. Prefer typing? `R5 nice`, `add Okta admin, must`, or `learning 25` go through the same path.
+
+![The requirements review page in chat mode: must-have toggles, a removed requirement, an added one, weight sliders, and the reply to paste into the chat](../../media/candidate-screen/review.png)
+
+<details>
+<summary><b>See the four chat cards</b> (rendered here exactly as they appear in chat)</summary>
+
+### Candidate Screen
+Screens a stack of applications against a job posting: fit and learning agility scored with evidence, fake and AI-gamed applications flagged, and a ranked report you can retune.
+
+**Step 1 of 4 · Send me**
+- [ ] **Job posting:** a link, a file, or pasted text
+- [ ] **Applications:** attach the resumes (.pdf, .docx, .txt, .md, .html)
+- [ ] *Optional:* say `web checks ok` to let me look up employers for flagged candidates, and name any legal requirement for the role (for example work authorization)
+
+**Then:** 2 · you approve the requirements → 3 · I scan and score → 4 · ranked results and report
+
+Try: *"Screen these resumes against the attached posting."*
+
+---
+
+### Step 2 of 4 · Review requirements
+**IT Manager, Larkspur Health (fictional example)** · 6 must-haves · 5 nice-to-have
+
+| ID | | Requirement | Matches on |
+|---|---|---|---|
+| R1 | **MUST** | Help desk ownership | FreshService, Jira Service Management, Zendesk, ServiceNow, help desk, service desk |
+| R2 | **MUST** | macOS and Windows support | macOS, Mac, Macs, Windows |
+| R3 | **MUST** | Google Workspace and Slack admin | Google Workspace, G Suite, Slack |
+| R4 | **MUST** | Conference room AV | Neat, Neat Bar, Neat Pad, Logitech, Zoom Rooms, conference room |
+| R5 | **MUST** | IT vendors and hardware purchasing | MSP, vendor, vendors, purchasing, procurement, hardware purchasing |
+| R6 | **MUST** | Onboarding and offboarding access | onboarding, offboarding, provisioning, access removal, access reviews, Rippling |
+| R7 | nice | Rippling / Okta / M365 admin | Rippling, Okta, Microsoft 365, Office 365, M365 |
+| R8 | nice | MDM | Jamf, Kandji, Intune, MDM, zero-touch |
+| R9 | nice | Regulated environment | HIPAA, SOC 2, healthcare, health system |
+| R10 | nice | Multi-office, fast growth | offices, multi-office, new office, growing, employees |
+| R11 | nice | AI and automation | automation, automate, automated, script, scripts, API |
+
+**Weights** Must-have skills 30 · Relevant experience 25 · Demonstrated impact 15 · Learning agility 15 · Work-style signals 5 · Nice-to-haves 10
+**Advance at** 75 · **Consider at** 60
+
+> Must-haves come from the hands-on items under Requirements and What you'll do. The Nice to have list is nice-to-have.
+> The 8+ years ask is scored as scope under Relevant experience, not as a hard cutoff.
+> AI and automation is nice-to-have, as the posting lists it.
+> Soft traits (patient, organized, works independently) are not requirements; they become work-style interview probes.
+
+**Your move**
+- Open **review-requirements.html** to adjust with toggles and sliders, then paste the reply it gives you
+- Or reply in words: `R5 nice` · `R7 must` · `remove R10` · `add Okta admin, must` · `learning 25` · `advance 70`
+- Or: `looks good`
+
+---
+
+### Step 3 of 4 · Screening
+Read 4 applications. Scoring each against the rubric next.
+
+| Applicant | File | Years | Shown in a role | Integrity scan |
+|---|---|---|---|---|
+| Linda Okafor | linda-okafor.txt | 17.3 | 4/11 | Clear |
+| Marcus Webb | marcus-webb.md | 8.4 | 9/11 | Clear |
+| Priya Raman | priya-raman.pdf | 12.2 | 11/11 | Clear |
+| Tyler Grant | tyler-grant.docx | 14.8 | 11/11 | **High risk** · Invisible Unicode tag characters carrying hidden text |
+
+---
+
+### Step 4 of 4 · Results
+**IT Manager, Larkspur Health (fictional example)** · 4 applications
+Advance **1** · Consider **1** · Verify first **1** · Pass **1**
+
+| # | Candidate | Fit | Recommendation | Integrity | Must-haves | Learning |
+|---|---|---|---|---|---|---|
+| 1 | **Priya Raman** | `██████████` 95 | Advance | Clear | 6/6 | 4/5 |
+| 2 | **Marcus Webb** | `███████░░░` 65 | Consider | Clear | 4/6 +1 partial | 5/5 |
+| 3 | **Tyler Grant** | `██░░░░░░░░` 16 | Verify first | High risk | 2/6 +4 partial | 1/5 |
+| 4 | **Linda Okafor** | `████░░░░░░` 38 | Pass | Clear | 2/6 +2 partial | 2/5 |
+
+- **Priya Raman:** First IT hire twice at growing multi-office companies; has already done this exact job, including SOC 2 and a Neat office build-out.
+- **Marcus Webb:** Solo IT lead at a 120-person digital health startup with the fastest learning curve in the stack, about 6 years in IT, light on vendor and purchasing work. Missed: IT vendors and hardware purchasing.
+- **Tyler Grant:** Matches every keyword, but the file hides three instructions to AI screeners, copies the posting, and claims tools before they existed.
+- **Linda Okafor:** Health system end-user computing director with deep HIPAA and service desk experience, at a scale and level very different from this hands-on, no-reports role. Missed: Google Workspace and Slack admin, Conference room AV.
+
+**Integrity**
+- **Tyler Grant (High risk):** Invisible Unicode tag characters carrying hidden text; Hidden text (white font color, 1pt font); Hidden text (vanish (hidden) property).
+  Next step: Verify identity, contact details, and employers before any interview.
+
+**Files**
+- Report (interactive): `sample-report.html`
+The HTML report retunes live (weights, thresholds, must-haves) and compares any two candidates.
+
+**Next** · reply with `compare Priya and Marcus` · `learning 25` · `R5 nice` · `Tyler's flags` · `questions for Priya` · `pdf`
+
+</details>
 
 In Cowork the skill detects that it cannot open a browser and runs the whole flow in chat. You lose the intake app, not the results, and the report's tuning and compare features work the same once you open it.
 
@@ -220,8 +317,12 @@ python3 $S/screen_signals.py extract --posting posting.txt --requirements requir
 python3 $S/render_report.py --signals signals.json --evals evals.json --requirements requirements.json \
   --out report.html --csv shortlist.csv --pdf report.pdf --markdown summary.md
 
-# What chat mode shows: the requirements review table, then summary.md
-python3 $S/render_report.py requirements-md requirements.json
+# What chat mode shows: the four cards, the review page, and how a pasted reply is applied
+python3 $S/render_report.py welcome
+python3 $S/render_report.py requirements-md requirements.json --page review-requirements.html
+python3 $S/render_report.py scan-md signals.json requirements.json
+printf 'Requirement changes (Candidate Screen)\nmust: R1, R2, R3, R4, R6\nweights: learning 25\n' > changes.txt
+python3 $S/render_report.py apply-changes requirements.json changes.txt
 
 # The app on its own (stages advance when Claude, or you, run the stage commands)
 python3 $S/screen_app.py serve --workspace /tmp/screen-demo

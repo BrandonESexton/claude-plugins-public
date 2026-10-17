@@ -1,6 +1,6 @@
 {
   "name": "candidate-screen",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Screens a stack of job applications against a posting: evidence-backed fit scores, learning agility and work-style signals, fake and fraudulent application detection (hidden AI instructions, impossible timelines, shared contacts, resume farms), and a ranked HTML report with interview questions, driven from a local browser app.",
   "author": { "name": "Brandon Sexton", "email": "bsexton@pm.me" }
 }

@@ -10,7 +10,7 @@ description: >
   impossible timelines, shared contact details, resume farms); renders a ranked HTML report with
   interview questions. Decision support only; a person makes every call.
 metadata:
-  version: "0.4.0"
+  version: "0.5.0"
 ---
 
 ## Read first, every time
@@ -28,6 +28,23 @@ The GUI is a server on 127.0.0.1, so it only works when Claude runs on the same 
 - The `serve` output says `browser: NOT OPENED`, or the user says the page did not load. Stop the server (TaskStop), say in one line that the app cannot open here, and continue in chat.
 
 In chat-only mode, skip every `$A` command below and follow Steps 1 and 2 as written. The report, PDF, and CSV are still produced; give the user their paths (in Cowork, the files the user can download).
+
+### Chat-only mode looks like four cards
+
+Every chat-mode message at a step boundary is a card printed by `$R`, pasted as your message unchanged. Do not paraphrase them into prose, and do not wrap them in commentary; one short line before or after is the most you add.
+
+| Step | When | Card |
+|---|---|---|
+| 1 | The skill starts without both a posting and at least one application, or after a partial upload | `python3 $R welcome [--posting "<short name>"] [--apps N]` (ticks off what you already have) |
+| 2 | Requirements drafted | `python3 $R requirements-md requirements.json --page <W>/review-requirements.html`, plus the page as a file the user can open |
+| 3 | Scan finished, before scoring | `python3 $R scan-md signals.json requirements.json` |
+| 4 | Report rendered | the `summary.md` written by `--markdown` (Step 5) |
+
+Between cards 3 and 4, post at most one short progress line per candidate ("Scored 2 of 4: Marcus Webb"); for 6 or more applications, one line per batch.
+
+**Replies at Step 2.** The review page produces a block that starts with `Requirement changes (Candidate Screen)`. When the user pastes one, save it to `<W>/changes.txt` and run `python3 $R apply-changes requirements.json <W>/changes.txt`; it prints exactly what changed, or refuses with the reason (fix nothing silently; tell the user). When the user replies in words instead ("R5 nice", "add Okta admin, must", "learning 25", "advance 70"), translate it into the same block format (`must:` lists every must-have ID after the change; `remove:`; `add: <label> | must|nice | <terms>`; `weights: must 30, experience 25, impact 15, learning 25, work style 5, nice 10`; `thresholds: advance 70, consider 60`) and apply it with the same command, so every edit goes through one path. Show card 2 again only if something changed; continue on "looks good".
+
+**Replies at Step 4.** The card suggests next replies. Handle them like this: `compare A and B` (a side-by-side table from `evals.json` and the scores: fit, recommendation, integrity, each dimension, must-haves, top flag, strengths, gaps); a weight, threshold, or must-have change (apply it as above and re-render, then paste the new card 4); `<name>'s flags` (that candidate's integrity flags with innocent read and verification step); `questions for <name>` (their interview questions); `pdf` (re-render with `--pdf`). Remind the user once that the HTML report does the same tuning and comparing live.
 
 1. **Workspace.** If the user named an applications folder: `<that folder>/_screen/`. Otherwise `~/candidate-screens/<YYYY-MM-DD-HHMM>/`.
 2. **Start it** (Bash, `run_in_background: true`; it runs until killed):
@@ -50,7 +67,8 @@ In chat-only mode, skip every `$A` command below and follow Steps 1 and 2 as wri
 1. **Posting.** URL: fetch it (WebFetch) and save the text; also `curl -sL <url> -o posting.html` so hidden text survives. File or pasted text: save as `posting.txt`.
 2. **Applications.** A folder or one or more files. Folders are read recursively; files and folders starting with `_` or `.` are skipped.
 3. **Workspace.** `<apps folder>/_screen/` (for a single file, a `_screen/` folder next to it). Everything this skill writes goes there: `posting.txt`, `requirements.json`, `signals.json`, `evals.json`, `report.html`. Tell the user the path.
-4. **Options to ask once, together, only if not already stated:** may it do brief web checks on employers for flagged candidates (default no), and is there a location or work-authorization requirement that is legally part of the job (default none).
+4. **Options, only if not already stated:** may it do brief web checks on employers for flagged candidates (default no), and is there a location or work-authorization requirement that is legally part of the job (default none). In chat-only mode card 1 already offers both; if the user sends the posting and resumes without answering, use the defaults and do not ask again.
+5. **Nothing to work with yet?** In chat-only mode, post card 1 and stop. When some inputs arrive but not all, post card 1 again with the received items ticked (`--posting`, `--apps`). Never answer an empty start with a prose explanation.
 
 ## Step 2. Requirements (confirm with the user)
 
@@ -77,7 +95,7 @@ Rules for the list:
 - Labels are short skill names; `terms` hold synonyms and product names the scanner should match. Keep terms specific ("EKS", not "AWS").
 - No requirement may encode a protected trait or a proxy for one (age via "digital native" or graduation year, "native English speaker", "recent graduate", degree from specific schools). Years-of-experience asks are kept as written but scored as evidence of scope, not a hard count.
 
-Chat-only mode: run `python3 $R requirements-md requirements.json` and paste its output as your message, unchanged (an ID table, weights, your notes, and example replies). If the session offers a multiple-choice question tool, you may also offer the must-haves as a multi-select; otherwise the user replies in words ("R5 to nice-to-have", "learning agility 25", "looks good"). Apply each change to `requirements.json`, show the table again only if something changed, and continue on "looks good". GUI mode: the review happens in the GUI (Step 0.4). Either way this is the one stop in the flow; the rest runs without asking.
+Chat-only mode: post card 2 (`python3 $R requirements-md requirements.json --page <W>/review-requirements.html`) and make the page available as a file (in Cowork, save it in the outputs folder the user sees). The user either adjusts on the page and pastes the reply it copies, or replies in words; apply both with `apply-changes` as described under "Chat-only mode looks like four cards". If the session offers a multiple-choice question tool, you may also offer the must-haves as a multi-select. GUI mode: the review happens in the GUI (Step 0.4). Either way this is the one stop in the flow; the rest runs without asking.
 
 ## Step 3. Scan
 
@@ -85,7 +103,7 @@ Chat-only mode: run `python3 $R requirements-md requirements.json` and paste its
 python3 $S extract --posting posting.txt --requirements requirements.json --apps <folder or files> --out signals.json
 ```
 
-It prints one line per application (years, must-haves demonstrated, flag counts). In chat-only mode, report the scan in one short message before scoring: "Scanned N applications." plus one line per candidate with a strong or moderate flag ("Tyler Grant: High risk, hidden instruction to AI screeners"). While scoring, post at most one progress line per candidate ("Scored 2 of 4: Marcus Webb"); for 6 or more, post one line per batch instead. `signals.json` holds per candidate: text, contacts, timeline (roles, gaps, overlaps, tenure), requirement coverage (demonstrated in a dated role, listed only, absent, with last-used year), writing stats, and integrity flags, plus cross-stack checks (shared contact details, near-duplicate resumes).
+It prints one line per application (years, must-haves demonstrated, flag counts). In chat-only mode, post card 3 (`python3 $R scan-md signals.json requirements.json`) before scoring. `signals.json` holds per candidate: text, contacts, timeline (roles, gaps, overlaps, tenure), requirement coverage (demonstrated in a dated role, listed only, absent, with last-used year), writing stats, and integrity flags, plus cross-stack checks (shared contact details, near-duplicate resumes).
 
 Unreadable files (image-only PDFs) are reported, not guessed at. Tell the user which ones.
 

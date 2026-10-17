@@ -1,0 +1,16 @@
+Casey Quinn
+casey.quinn.cloud7734@example.com | +1 555-016-7788
+
+Professional Experience
+Senior Platform Engineer, Stratus Cloud Partners LLC | Mar 2021 - Present
+- Managed Kubernetes clusters on AWS EKS for enterprise applications with high availability
+- Implemented Terraform infrastructure as code for scalable cloud environments
+- Designed CI/CD pipelines with GitHub Actions and Argo CD to accelerate delivery
+- Configured Prometheus and Grafana monitoring and alerting for production workloads
+- Developed automation scripts in Python and Go to improve operational efficiency
+Senior DevOps Engineer, BlueRiver Technologies | May 2019 - Feb 2021
+- Supported Kafka streaming platforms and AWS IAM security best practices
+- Collaborated with cross-functional teams to deliver robust cloud solutions
+
+Skills
+Kubernetes, EKS, Terraform, AWS, GitHub Actions, Argo CD, Prometheus, Grafana, Python, Go, Kafka

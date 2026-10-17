@@ -1,0 +1,27 @@
+Senior Platform Engineer
+Northwind Logistics (fictional example) | Remote, US | $165,000 - $195,000
+
+About the role
+You will join a 6-person platform team that runs the Kubernetes platform behind our routing and billing services (about 180 services, 3 AWS regions). You report to the Director of Infrastructure. Success in year one: self-service environments for product teams, deploy lead time under 30 minutes, and an on-call rotation that pages less than twice a week.
+
+What you'll do
+- Own and evolve our EKS clusters, upgrades, and multi-region failover
+- Build Terraform modules and golden paths product teams can use without filing tickets
+- Run CI/CD (GitHub Actions, Argo CD) and make deploys boring
+- Improve observability with Prometheus, Grafana, and OpenTelemetry
+- Lead incident reviews and mentor two mid-level engineers
+
+Requirements
+- 5+ years in infrastructure, SRE, or platform engineering
+- Production Kubernetes experience (EKS preferred)
+- Terraform for real infrastructure, not just tutorials
+- Deep AWS experience: networking, IAM, compute
+- CI/CD pipeline design (GitHub Actions, Argo CD, or similar)
+- Observability: metrics, tracing, alerting (Prometheus, Grafana, OpenTelemetry)
+- Strong Python or Go
+
+Nice to have
+- Kafka or another event streaming platform
+- Cloud cost optimization (FinOps)
+- Security hardening for Kubernetes and IAM
+- Logistics or high-volume transactional systems

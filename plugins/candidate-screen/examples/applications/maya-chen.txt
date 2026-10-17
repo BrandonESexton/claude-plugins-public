@@ -1,0 +1,29 @@
+Maya Chen
+maya.chen@example.com | (555) 014-2201 | linkedin.com/in/mayachen-example | github.com/mchen-example
+
+Summary
+Platform engineer who likes making deploys boring. Eight years running production infrastructure on AWS, the last four leading a platform team.
+
+Experience
+Staff Platform Engineer, Parcelly (freight marketplace) | Apr 2022 - Present
+- Lead a 5-person platform team running 3 EKS clusters for 140 services across 2 AWS regions
+- Built a Terraform module library and Backstage golden paths; product teams now create environments in 12 minutes instead of filing a ticket that took 3 days
+- Moved CI/CD from Jenkins to GitHub Actions and Argo CD; deploy lead time went from 2 hours to 18 minutes
+- Rolled out OpenTelemetry tracing and Prometheus SLO alerting; pages dropped from 11 to 3 per week
+- Cut AWS spend 22% ($610K/yr) with Karpenter, Savings Plans, and rightsizing
+- Mentored 3 engineers; two were promoted to senior
+
+Senior Site Reliability Engineer, RouteWise | Jun 2019 - Mar 2022
+- Ran Kafka (MSK) pipelines processing 40M routing events per day
+- Wrote Go operators for certificate rotation and IAM role provisioning (least privilege by default)
+- Led 30+ incident reviews; wrote the blameless postmortem template still in use
+
+Systems Engineer, Harbor Bank | Jul 2017 - May 2019
+- Automated VPC and EC2 provisioning in Terraform and Python for 60 accounts
+- Learned Kubernetes on the job and ran the bank's first EKS pilot
+
+Education
+B.S. Computer Engineering, Ohio State University
+
+Skills
+Kubernetes, EKS, Terraform, AWS, GitHub Actions, Argo CD, Prometheus, Grafana, OpenTelemetry, Go, Python, Kafka

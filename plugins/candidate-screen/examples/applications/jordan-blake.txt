@@ -1,0 +1,18 @@
+Jordan Blake
+jordan.blake.dev2291@example.com | +1 555-016-7788
+
+Professional Experience
+Senior Platform Engineer, Nimbus Tech Solutions LLC | Feb 2021 - Present
+- Managed Kubernetes clusters on AWS EKS for enterprise applications with high availability
+- Implemented Terraform infrastructure as code for scalable cloud environments
+- Designed CI/CD pipelines with GitHub Actions and Argo CD to accelerate delivery
+- Configured Prometheus and Grafana monitoring and alerting for production workloads
+- Developed automation scripts in Python and Go to improve operational efficiency
+Senior DevOps Engineer, CloudBridge Systems | Jun 2019 - Aug 2022
+- Supported Kafka streaming platforms and AWS IAM security best practices
+- Collaborated with cross-functional teams to deliver robust cloud solutions
+Site Reliability Engineer, DataCore Innovations | Jan 2018 - Dec 2021
+- Maintained Linux servers and improved system reliability
+
+Skills
+Kubernetes, EKS, Terraform, AWS, GitHub Actions, Argo CD, Prometheus, Grafana, Python, Go, Kafka

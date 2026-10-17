@@ -1,0 +1,30 @@
+Linda Okafor
+Yonkers, NY | linda.okafor@example.com | (555) 012-8841 | linkedin.com/in/lindaokafor-example
+
+PROFESSIONAL SUMMARY
+IT operations leader with 16 years in hospital and health system IT. I run large service desk and end-user computing teams in HIPAA environments and have led two EHR-related device refreshes.
+
+EXPERIENCE
+Director, End-User Computing, Riverside Regional Health System (9,000 employees, 4 hospitals)
+Apr 2019 - Present
+- Lead a team of 14 (service desk, desktop, and field services) supporting 11,000 Windows endpoints
+- Own ServiceNow ITSM for the EUC organization; brought first-call resolution from 58% to 74%
+- Ran a $3.1M Windows 10 and Windows 11 refresh across 4 hospitals with zero clinical downtime
+- Partner with the CISO on HIPAA audits, access certifications, and phishing training for 9,000 staff
+- Negotiate and manage contracts with Dell, CDW, and two staffing vendors
+
+IT Service Desk Manager, Riverside Regional Health System
+Jan 2014 - Mar 2019
+- Managed 8 analysts on a 24/7 service desk handling 9,000 tickets a month
+- Built the knowledge base in ServiceNow and cut average handle time 20%
+
+Desktop Support Analyst, St. Brendan Medical Center
+Jul 2009 - Dec 2013
+- Supported Windows 7 workstations, Citrix, and clinical printers across 3 campuses
+- Configured SCCM imaging for 2,000 devices
+
+EDUCATION
+B.S. Information Systems, Pace University
+
+SKILLS
+ServiceNow, SCCM, Intune, Active Directory, Microsoft 365, Citrix, Cisco, ITIL v4, HIPAA, vendor management, team leadership

@@ -1,0 +1,18 @@
+Riley Brooks
+riley.brooks@example.com | 555-011-9032 | github.com/rbrooks-example
+
+Experience
+Senior Frontend Engineer, Shopline | Mar 2020 - Present
+- Built the React and TypeScript checkout used by 2M shoppers a month; conversion up 6%
+- Led migration from Webpack to Vite; build times down 70%
+- Set up GitHub Actions for lint, test, and preview deploys on Vercel
+
+Frontend Engineer, Bright Agency | Jan 2017 - Feb 2020
+- Built marketing sites and dashboards for 20+ clients in React and Vue
+- Wrote a small Python script to sync CMS content
+
+Education
+B.A. Graphic Design
+
+Skills
+React, TypeScript, Next.js, Vue, CSS, GitHub Actions, Docker, AWS S3, Figma

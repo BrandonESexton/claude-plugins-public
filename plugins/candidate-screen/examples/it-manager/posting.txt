@@ -1,0 +1,29 @@
+IT Manager
+Larkspur Health (fictional example) | New York, NY (Remote OK) | $130,000 - $170,000 | Full-time
+
+About the role
+Larkspur Health builds billing software for independent clinics. We're about 140 people across New York, Los Angeles, and remote, and we're hiring our first in-house IT Manager. You'll be the person everyone calls when something breaks, and the person who makes sure it doesn't break twice. No direct reports today. You report to the VP of Operations.
+
+What you'll do
+- Run the help desk: be the first stop for IT help in person in New York and remotely for everyone else, manage the ticket queue in FreshService, and write self-serve answers for the questions that keep coming back.
+- Make every new hire ready on their first morning and remove access the day someone leaves, using Rippling as the source of truth for accounts.
+- Buy, set up, and track laptops and peripherals, and move us to zero-touch Mac provisioning.
+- Keep the conference rooms working: Neat in New York, Logitech in Los Angeles, with a quick check every morning.
+- Administer Google Workspace, Slack, Zoom, and our other SaaS tools, and run quarterly access reviews.
+- Manage our outsourced IT provider and other vendors, and decide what stays in-house.
+- Partner with Security on device compliance for SOC 2 and HIPAA.
+
+Requirements
+- 8+ years in IT support or operations, including time as the main IT person for an office
+- Hands-on support for macOS and Windows
+- Google Workspace and Slack administration
+- Conference room and AV setup (Neat, Logitech, Zoom Rooms, or similar)
+- Managing IT vendors and buying hardware
+- Clear, patient communication with non-technical coworkers
+
+Nice to have
+- Rippling, Okta, or Microsoft 365 administration
+- An MDM tool such as Jamf, Kandji, or Intune
+- FreshService, Jira Service Management, or Zendesk
+- Experience in healthcare or another regulated environment (SOC 2, HIPAA)
+- Using scripts or AI to automate repetitive IT work

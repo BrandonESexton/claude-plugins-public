@@ -1,0 +1,18 @@
+{
+  "role": "Senior Platform Engineer",
+  "company": "Northwind Logistics (example)",
+  "requirements": [
+    {"id": "R1", "label": "Kubernetes", "terms": ["k8s", "EKS", "GKE", "AKS", "OpenShift"], "must": true, "text": "Production Kubernetes experience (EKS preferred)"},
+    {"id": "R2", "label": "Terraform", "terms": ["OpenTofu", "Terragrunt"], "must": true, "text": "Terraform for real infrastructure"},
+    {"id": "R3", "label": "AWS", "terms": ["EC2", "VPC", "IAM", "EKS", "Lambda"], "must": true, "text": "Deep AWS experience: networking, IAM, compute"},
+    {"id": "R4", "label": "CI/CD", "terms": ["GitHub Actions", "Argo CD", "ArgoCD", "Jenkins", "GitLab CI", "CircleCI", "Spinnaker"], "must": true, "text": "CI/CD pipeline design"},
+    {"id": "R5", "label": "Observability", "terms": ["Prometheus", "Grafana", "OpenTelemetry", "Datadog", "tracing", "alerting"], "must": true, "text": "Metrics, tracing, alerting"},
+    {"id": "R6", "label": "Python or Go", "terms": ["Python", "Golang", "Go"], "must": true, "text": "Strong Python or Go"},
+    {"id": "R7", "label": "Kafka / streaming", "terms": ["Kafka", "Kinesis", "Pulsar", "RabbitMQ"], "must": false, "text": "Event streaming"},
+    {"id": "R8", "label": "FinOps", "terms": ["cost optimization", "cloud cost", "Savings Plans", "spend"], "must": false, "text": "Cloud cost optimization"},
+    {"id": "R9", "label": "K8s / IAM security", "terms": ["IAM", "OPA", "Kyverno", "security hardening", "least privilege"], "must": false, "text": "Security hardening"},
+    {"id": "R10", "label": "Logistics domain", "terms": ["logistics", "shipping", "freight", "routing", "supply chain"], "must": false, "text": "Logistics or high-volume transactional systems"}
+  ],
+  "weights": {"must_have": 30, "experience": 25, "impact": 15, "learning_agility": 15, "work_style": 5, "nice_to_have": 10},
+  "thresholds": {"advance": 75, "consider": 60}
+}

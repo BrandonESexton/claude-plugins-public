@@ -1,0 +1,141 @@
+{
+  "candidates": [
+    {
+      "id": "maya-chen",
+      "name": "Maya Chen",
+      "headline": "Staff platform lead at a freight marketplace; has already built most of what this role asks for.",
+      "dimensions": {
+        "must_have": {"score": 5, "rationale": "Every must-have shows up inside a current, dated role with a result attached.", "evidence": ["Lead a 5-person platform team running 3 EKS clusters for 140 services across 2 AWS regions", "Moved CI/CD from Jenkins to GitHub Actions and Argo CD", "Rolled out OpenTelemetry tracing and Prometheus SLO alerting"]},
+        "experience": {"score": 5, "rationale": "Same work at similar scope (140 vs 180 services, multi-region) for four years, plus SRE time before that.", "evidence": ["Staff Platform Engineer, Parcelly (freight marketplace)"]},
+        "impact": {"score": 5, "rationale": "Several outcomes with baselines that map straight onto the posting's year-one goals.", "evidence": ["deploy lead time went from 2 hours to 18 minutes", "pages dropped from 11 to 3 per week", "Cut AWS spend 22% ($610K/yr)"]},
+        "learning_agility": {"score": 4, "confidence": "medium", "rationale": "Learned Kubernetes on the job and led the first pilot, then grew into leading a platform team. Recent learning is less visible than early-career learning.", "evidence": ["Learned Kubernetes on the job and ran the bank's first EKS pilot", "Built a Terraform module library and Backstage golden paths"]},
+        "work_style": {"score": 4, "confidence": "low", "rationale": "Ownership tied to outcomes, mentoring with a result, and a process artifact others still use.", "evidence": ["Mentored 3 engineers; two were promoted to senior", "wrote the blameless postmortem template still in use"]},
+        "nice_to_have": {"score": 5, "rationale": "Kafka, FinOps, least-privilege IAM, and logistics domain all demonstrated.", "evidence": ["Ran Kafka (MSK) pipelines processing 40M routing events per day", "least privilege by default"]}
+      },
+      "strengths": ["Has already hit the posting's year-one targets elsewhere: self-service environments, sub-30-minute deploys, fewer pages", "Logistics domain and multi-region EKS at comparable scale", "Mentors with a track record of promotions"],
+      "gaps": ["Staff title; check level and comp expectations against a senior band", "Less hands-on coding evidence in the current role than the last one"],
+      "reviewer_flags": [],
+      "interview_questions": [
+        {"area": "experience", "question": "Walk me through the multi-region failover design at Parcelly. What failed the first time you tested it?"},
+        {"area": "impact", "question": "The deploy lead time went from 2 hours to 18 minutes. What were the three biggest contributors, and what did you try that did not help?"},
+        {"area": "learning_agility", "question": "When you ran the first EKS pilot at Harbor Bank, how did you get productive on Kubernetes in the first few weeks? What would you do differently now?"},
+        {"area": "work_style", "question": "Tell me about a time a product team pushed back on a golden path you built. How did it end?"},
+        {"area": "must_have", "question": "This is a senior IC role with mentoring, not a team lead role. How do you feel about stepping back from managing?"}
+      ],
+      "notes": ""
+    },
+    {
+      "id": "dev-patel",
+      "name": "Dev Patel",
+      "headline": "Former school-district sysadmin, three years into platform work, with a fast and well-documented ramp.",
+      "dimensions": {
+        "must_have": {"score": 3, "rationale": "Kubernetes, Terraform, AWS, CI/CD, and Python/Go are all demonstrated recently. Production observability is thin: Zabbix at the prior job and Prometheus only in a homelab.", "evidence": ["ran the migration of 45 services from EC2 to EKS within 9 months", "Built GitHub Actions pipelines with automated canary analysis", "Set up Zabbix monitoring and an on-call rotation"]},
+        "experience": {"score": 3, "rationale": "About 3 years of platform work at smaller scope than this role (45 services, single team), plus 6 years of solid ops. Below the senior bar on scope today.", "evidence": ["Platform Engineer, Lumen Health (telehealth)", "Ran 300 Windows and Linux servers and a VMware cluster for 40 schools"]},
+        "impact": {"score": 4, "rationale": "Clear, specific outcomes with baselines in both roles.", "evidence": ["rollback time from 40 minutes to 4", "saving the help desk about 25 hours a week"]},
+        "learning_agility": {"score": 5, "confidence": "medium", "rationale": "Three separate cases of learning a new tool and shipping it to production fast, a promotion within a year, and ongoing self-directed work.", "evidence": ["Joined as the team's first Kubernetes hire with no prior k8s production experience", "Taught myself Go to write an internal CLI that 60 engineers use daily", "Promoted from Platform Engineer I to II after 11 months"]},
+        "work_style": {"score": 4, "confidence": "low", "rationale": "Builds tools other people adopt, shares what he learns publicly, and set up on-call for a small team.", "evidence": ["adopted by 4 teams", "writing about it at devpatel.dev/blog"]},
+        "nice_to_have": {"score": 2, "rationale": "Some IAM work through Terraform modules; no Kafka, FinOps, or logistics.", "evidence": ["Wrote the team's Terraform modules for EKS, RDS, and IAM"]}
+      },
+      "requirements": {"R5": "partial", "R9": "partial", "R10": "not_met"},
+      "strengths": ["Strongest learning-agility evidence in the stack: new tool to production in months, three times", "Specific, measured outcomes", "Already doing the EC2-to-EKS and golden-path work this team does"],
+      "gaps": ["Production observability (tracing, SLO alerting) not shown outside a homelab", "Scope below senior today: 45 services, no multi-region", "No incident leadership at scale"],
+      "reviewer_flags": [],
+      "interview_questions": [
+        {"area": "must_have", "question": "What does production monitoring look like at Lumen today, and what part of it have you personally built or tuned?"},
+        {"area": "learning_agility", "question": "You were the first Kubernetes hire with no production k8s experience. What did your first 30 days look like, and what broke that taught you the most?"},
+        {"area": "experience", "question": "How would your EKS migration approach change for 180 services across 3 regions?"},
+        {"area": "work_style", "question": "Tell me about a time a team did not want to adopt one of your Terraform modules."},
+        {"area": "impact", "question": "Walk me through the canary analysis setup. What metrics decide a rollback?"}
+      ],
+      "notes": "Could fit as a strong mid-to-senior hire if the team can coach observability. Worth a conversation even though the score is under the Advance bar."
+    },
+    {
+      "id": "riley-brooks",
+      "name": "Riley Brooks",
+      "headline": "Strong senior frontend engineer; this is a different job.",
+      "dimensions": {
+        "must_have": {"score": 1, "rationale": "Kubernetes, Terraform, and observability are absent; AWS is S3 only; Python is a small script. CI/CD is the one real overlap.", "evidence": ["Set up GitHub Actions for lint, test, and preview deploys on Vercel", "Wrote a small Python script to sync CMS content"]},
+        "experience": {"score": 1, "rationale": "Nine years of frontend work, no infrastructure ownership.", "evidence": ["Senior Frontend Engineer, Shopline"]},
+        "impact": {"score": 4, "rationale": "Clear, measured results, in a different domain.", "evidence": ["conversion up 6%", "build times down 70%"]},
+        "learning_agility": {"score": 3, "confidence": "medium", "rationale": "Kept current inside frontend (React, Vue, Vite migration). No evidence of moving into infrastructure.", "evidence": ["Led migration from Webpack to Vite"]},
+        "work_style": {"score": 3, "confidence": "low", "rationale": "Led a migration; little else to go on.", "evidence": ["Led migration from Webpack to Vite"]},
+        "nice_to_have": {"score": 1, "rationale": "None of the preferred items.", "evidence": []}
+      },
+      "requirements": {"R3": "partial", "R6": "partial"},
+      "strengths": ["Measured impact on a high-traffic checkout", "Build-tooling and CI experience"],
+      "gaps": ["Five of six must-haves missing or token", "No on-call or infrastructure ownership"],
+      "reviewer_flags": [],
+      "interview_questions": [],
+      "notes": "Not a fit for this role. Could be worth routing to a frontend or developer-experience opening if one exists."
+    },
+    {
+      "id": "alex-morgan",
+      "name": "Alex Morgan",
+      "headline": "Claims principal-level cloud work, but the application hides an instruction to AI screeners and copies the posting.",
+      "dimensions": {
+        "must_have": {"score": 2, "rationale": "Every must-have is named, but only as buzzword lists. Two of the most specific bullets are copied from this posting, so they are not evidence of anything.", "evidence": ["Spearheaded dynamic, cutting-edge cloud transformation initiatives leveraging Kubernetes, Terraform, and AWS"]},
+        "experience": {"score": 2, "rationale": "Titles are senior but no system, team size, customer, or scale is named anywhere across 18 years.", "evidence": ["Principal Cloud Architect, Vertex Global Solutions"]},
+        "impact": {"score": 1, "rationale": "No outcomes, only adjectives.", "evidence": ["Drove cross-functional initiatives to deliver robust, best-in-class observability"]},
+        "learning_agility": {"score": 2, "confidence": "low", "rationale": "Nothing on paper shows learning anything specific or when.", "evidence": ["Led Kubernetes and Docker adoption for enterprise clients"]},
+        "work_style": {"score": 1, "confidence": "low", "rationale": "Only adjectives; and the hidden instruction is a candor problem.", "evidence": []},
+        "nice_to_have": {"score": 2, "rationale": "Kafka appears only in the skills list and the hidden text.", "evidence": []}
+      },
+      "requirements": {"R7": "partial", "R8": "not_met"},
+      "strengths": ["Names the right technologies"],
+      "gaps": ["No specific system, scale, or outcome anywhere", "Bullets copied from the posting"],
+      "reviewer_flags": [
+        {"severity": "moderate", "title": "Copied posting text written in the posting's voice", "evidence": "Owned and evolve our EKS clusters, upgrades, and multi-region failover for key accounts", "innocent_read": "Tailoring gone too far, possibly by a resume service.", "verify": "Ask them to describe the multi-region failover they ran, in detail."},
+        {"severity": "weak", "title": "Unplaceable employers carry all the senior claims", "evidence": "Vertex Global Solutions / Apex Digital Group", "innocent_read": "Small consultancies with little web presence are common.", "verify": "Verify both employers through a main line you look up yourself."}
+      ],
+      "interview_questions": [
+        {"area": "integrity", "question": "Your resume file contains white, 1-point text addressed to an AI screener. Can you tell me about that?"},
+        {"area": "must_have", "question": "Walk me through the last EKS upgrade you ran: version from and to, what broke, and how you rolled back."},
+        {"area": "integrity", "question": "Who was your manager at Apex Digital Group, and what was the biggest client you supported there?"}
+      ],
+      "notes": "The hidden text is a strong signal on its own. Scored on the visible content only, as if the instruction were not there."
+    },
+    {
+      "id": "jordan-blake",
+      "name": "Jordan Blake",
+      "headline": "Matches every keyword, but shares a phone number and most of its text with another applicant, and three full-time jobs overlap.",
+      "dimensions": {
+        "must_have": {"score": 3, "rationale": "All must-haves named in role bullets, but each bullet is generic with no scale or result.", "evidence": ["Managed Kubernetes clusters on AWS EKS for enterprise applications with high availability", "Implemented Terraform infrastructure as code for scalable cloud environments"]},
+        "experience": {"score": 2, "rationale": "Senior titles, but no system, team, or scale named; three roles overlap for over a year.", "evidence": ["Senior Platform Engineer, Nimbus Tech Solutions LLC"]},
+        "impact": {"score": 1, "rationale": "No outcomes.", "evidence": ["Developed automation scripts in Python and Go to improve operational efficiency"]},
+        "learning_agility": {"score": 2, "confidence": "low", "rationale": "Nothing shows what was learned or when.", "evidence": ["Maintained Linux servers and improved system reliability"]},
+        "work_style": {"score": 2, "confidence": "low", "rationale": "Generic collaboration claim only.", "evidence": ["Collaborated with cross-functional teams to deliver robust cloud solutions"]},
+        "nice_to_have": {"score": 3, "rationale": "Kafka and IAM named, without detail.", "evidence": ["Supported Kafka streaming platforms and AWS IAM security best practices"]}
+      },
+      "strengths": ["Keyword coverage of the stack"],
+      "gaps": ["No specifics anywhere", "Timeline does not add up"],
+      "reviewer_flags": [],
+      "interview_questions": [
+        {"area": "integrity", "question": "Before any technical interview: live video ID check, and confirm the phone number on the application belongs to this person."},
+        {"area": "integrity", "question": "Walk me through 2019 to 2022. Which of the three roles were full-time, and who did you report to at each?"},
+        {"area": "must_have", "question": "Describe one EKS cluster you managed: node count, how upgrades were done, and the worst incident."}
+      ],
+      "notes": "Pair with casey-quinn. Same phone, 74% shared text, generic LLC employers. Consistent with a resume farm or one person applying twice; verify identity before spending interview time."
+    },
+    {
+      "id": "casey-quinn",
+      "name": "Casey Quinn",
+      "headline": "Near-copy of Jordan Blake's resume with the same phone number.",
+      "dimensions": {
+        "must_have": {"score": 3, "rationale": "All must-haves named in generic bullets with no scale or result.", "evidence": ["Managed Kubernetes clusters on AWS EKS for enterprise applications with high availability"]},
+        "experience": {"score": 2, "rationale": "No system, team, or scale named.", "evidence": ["Senior Platform Engineer, Stratus Cloud Partners LLC"]},
+        "impact": {"score": 1, "rationale": "No outcomes.", "evidence": ["Developed automation scripts in Python and Go to improve operational efficiency"]},
+        "learning_agility": {"score": 2, "confidence": "low", "rationale": "Nothing to go on.", "evidence": []},
+        "work_style": {"score": 2, "confidence": "low", "rationale": "Generic collaboration claim only.", "evidence": ["Collaborated with cross-functional teams to deliver robust cloud solutions"]},
+        "nice_to_have": {"score": 3, "rationale": "Kafka and IAM named, without detail.", "evidence": ["Supported Kafka streaming platforms and AWS IAM security best practices"]}
+      },
+      "strengths": ["Keyword coverage of the stack"],
+      "gaps": ["No specifics anywhere"],
+      "reviewer_flags": [],
+      "interview_questions": [
+        {"area": "integrity", "question": "Before any technical interview: live video ID check, and confirm the phone number on the application belongs to this person."},
+        {"area": "must_have", "question": "Describe one production incident you led end to end."}
+      ],
+      "notes": "See jordan-blake."
+    }
+  ]
+}

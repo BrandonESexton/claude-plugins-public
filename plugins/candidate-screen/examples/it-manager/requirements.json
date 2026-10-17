@@ -1,0 +1,177 @@
+{
+  "role": "IT Manager",
+  "company": "Larkspur Health (fictional example)",
+  "notes": [
+    "Must-haves come from the hands-on items under Requirements and What you'll do. The Nice to have list is nice-to-have.",
+    "The 8+ years ask is scored as scope under Relevant experience, not as a hard cutoff.",
+    "AI and automation is nice-to-have, as the posting lists it.",
+    "Soft traits (patient, organized, works independently) are not requirements; they become work-style interview probes."
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "label": "Help desk ownership",
+      "terms": [
+        "FreshService",
+        "Jira Service Management",
+        "Zendesk",
+        "ServiceNow",
+        "help desk",
+        "service desk",
+        "ticket",
+        "tickets"
+      ],
+      "must": true,
+      "text": "Own the help desk and be the go-to IT person in a professional office"
+    },
+    {
+      "id": "R2",
+      "label": "macOS and Windows support",
+      "terms": [
+        "macOS",
+        "Mac",
+        "Macs",
+        "Windows"
+      ],
+      "must": true,
+      "text": "Hands-on macOS and Windows hardware and software support"
+    },
+    {
+      "id": "R3",
+      "label": "Google Workspace and Slack admin",
+      "terms": [
+        "Google Workspace",
+        "G Suite",
+        "Slack"
+      ],
+      "must": true,
+      "text": "Administer Google Workspace and Slack"
+    },
+    {
+      "id": "R4",
+      "label": "Conference room AV",
+      "terms": [
+        "Neat",
+        "Neat Bar",
+        "Neat Pad",
+        "Logitech",
+        "Zoom Rooms",
+        "conference room",
+        "conference rooms",
+        "AV"
+      ],
+      "must": true,
+      "text": "Run conference room and AV setups (Neat, Logitech, or similar)"
+    },
+    {
+      "id": "R5",
+      "label": "IT vendors and hardware purchasing",
+      "terms": [
+        "MSP",
+        "vendor",
+        "vendors",
+        "purchasing",
+        "procurement",
+        "hardware purchasing"
+      ],
+      "must": true,
+      "text": "Manage IT vendors and hardware purchasing"
+    },
+    {
+      "id": "R6",
+      "label": "Onboarding and offboarding access",
+      "terms": [
+        "onboarding",
+        "offboarding",
+        "provisioning",
+        "access removal",
+        "access reviews",
+        "Rippling"
+      ],
+      "must": true,
+      "text": "Day-one onboarding, on-time offboarding, account and app access"
+    },
+    {
+      "id": "R7",
+      "label": "Rippling / Okta / M365 admin",
+      "terms": [
+        "Rippling",
+        "Okta",
+        "Microsoft 365",
+        "Office 365",
+        "M365"
+      ],
+      "must": false,
+      "text": "Rippling, Okta, or Microsoft 365 administration"
+    },
+    {
+      "id": "R8",
+      "label": "MDM",
+      "terms": [
+        "Jamf",
+        "Kandji",
+        "Intune",
+        "MDM",
+        "zero-touch"
+      ],
+      "must": false,
+      "text": "MDM tools (Jamf, Kandji, Intune)"
+    },
+    {
+      "id": "R9",
+      "label": "Regulated environment",
+      "terms": [
+        "HIPAA",
+        "SOC 2",
+        "healthcare",
+        "health system"
+      ],
+      "must": false,
+      "text": "Healthcare, SOC 2, or HIPAA environment"
+    },
+    {
+      "id": "R10",
+      "label": "Multi-office, fast growth",
+      "terms": [
+        "offices",
+        "multi-office",
+        "new office",
+        "growing",
+        "employees"
+      ],
+      "must": false,
+      "text": "Small or mid-sized fast-growing company with more than one office"
+    },
+    {
+      "id": "R11",
+      "label": "AI and automation",
+      "terms": [
+        "automation",
+        "automate",
+        "automated",
+        "script",
+        "scripts",
+        "API",
+        "LLM",
+        "bot",
+        "Apps Script",
+        "PowerShell",
+        "Python"
+      ],
+      "must": false,
+      "text": "Uses AI and automation to remove repetitive IT work"
+    }
+  ],
+  "weights": {
+    "must_have": 30,
+    "experience": 25,
+    "impact": 15,
+    "learning_agility": 15,
+    "work_style": 5,
+    "nice_to_have": 10
+  },
+  "thresholds": {
+    "advance": 75,
+    "consider": 60
+  }
+}

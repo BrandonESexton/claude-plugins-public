@@ -40,7 +40,7 @@ Claude Code:
 /plugin install job-application@claude-plugins-public
 ```
 
-Claude Cowork: zip a plugin folder (for example `plugins/job-application`) and upload it. `mac-setup` is the exception: it must read your own machine, so it runs only in Claude Code on that Mac.
+Claude Cowork: zip a plugin folder (for example `plugins/job-application`) and upload it. `mac-setup` is the exception: it must read your own machine, so it runs only in Claude Code on that Mac. `candidate-screen` works in Cowork in chat mode; its browser app needs Claude Code on your own machine.
 
 ### Download a single plugin (no marketplace)
 

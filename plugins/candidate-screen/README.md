@@ -112,9 +112,23 @@ Claude's reading pass adds what a careful recruiter would catch: employers you c
 
 ## Quick start
 
+### Claude Code vs Claude Cowork
+
+The browser app is a small server on `127.0.0.1`, so it only opens when Claude runs on the same computer as your browser.
+
+| | Claude Code (terminal or IDE, on your machine) | Claude Cowork |
+|---|---|---|
+| Browser app (drag and drop, weight sliders, live progress) | Yes, opens automatically | No: Cowork runs Claude in a sandbox your browser cannot reach |
+| Requirements review and weights | In the app | In chat: Claude shows a table and you reply with changes |
+| Scoring, learning agility, fraud checks, interview questions | Yes | Yes, identical |
+| Report, PDF, and CSV | Yes, plus Save to... and Show in Finder | Yes, as files you download from Cowork |
+| Brief employer web checks | Yes, if you allow them | Yes, if you allow them |
+
+In Cowork the skill detects that it cannot open a browser and runs the whole flow in chat. You lose the app, not the results.
+
 ### Requirements
 
-- **Claude Code** on your own computer (the browser app runs locally). In Claude Cowork the skill runs in chat mode instead.
+- **Claude Code** on your own computer for the browser app, or **Claude Cowork** for chat mode (see above).
 - **Python 3.9+**, standard library only. Nothing to `pip install`.
 - **poppler** for PDF resumes: `brew install poppler` (macOS) or `apt install poppler-utils` (Linux).
 - **Chrome, Chromium, Edge, or Brave** for one-click PDF export. Optional: the report's own Save as PDF button works without it.
@@ -134,7 +148,7 @@ Claude's reading pass adds what a careful recruiter would catch: employers you c
 claude --plugin-dir ./candidate-screen
 ```
 
-In Claude Cowork, upload the zip as a plugin.
+In Claude Cowork, upload the zip as a plugin. It runs in chat mode there (see the table above).
 
 ### Run it
 
@@ -230,7 +244,7 @@ What the tool does to help: a binding never-scored list, must-haves you approve 
 - In PDFs it catches tiny and off-page hidden text but not white text (white text is caught in .docx and HTML). Open flagged files yourself.
 - It cannot see LinkedIn profiles. A thin profile behind an impressive resume becomes a verification item for a recruiter.
 - Scanned image-only PDFs are reported as unreadable rather than guessed at. OCR them first.
-- The browser app needs Claude Code running on the same machine. If the session ends mid-screen, the app waits.
+- The browser app needs Claude Code running on the same machine; in Cowork the skill uses chat mode. If the Claude session ends mid-screen, the app waits.
 - The scoring anchors are written for knowledge-work roles. For other job families, edit [`rubric.md`](skills/screen-candidates/references/rubric.md).
 
 ## Research behind the rubric

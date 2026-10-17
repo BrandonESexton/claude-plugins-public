@@ -10,7 +10,7 @@ description: >
   impossible timelines, shared contact details, resume farms); renders a ranked HTML report with
   interview questions. Decision support only; a person makes every call.
 metadata:
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 ## Read first, every time
@@ -21,14 +21,21 @@ Script paths below are relative to this skill's directory: `S=scripts/screen_sig
 
 ## Step 0. Launch the GUI (default)
 
-The skill runs through a local browser app unless the user asks for chat only ("no GUI", "just do it in chat") or the session cannot open a browser. In chat-only mode, skip every `$A` command below and follow Steps 1 and 2 as written.
+The GUI is a server on 127.0.0.1, so it only works when Claude runs on the same computer as the user's browser (Claude Code in a local terminal or IDE). **Use chat-only mode instead, and never start the server, when any of these is true:**
+
+- You are running in **Claude Cowork**, Claude on the web, or any sandbox, VM, or remote container (your environment or system prompt says so, or the working directory is a sandbox mount rather than the user's own machine).
+- The user asks for chat only ("no GUI", "just do it in chat").
+- The `serve` output says `browser: NOT OPENED`, or the user says the page did not load. Stop the server (TaskStop), say in one line that the app cannot open here, and continue in chat.
+
+In chat-only mode, skip every `$A` command below and follow Steps 1 and 2 as written. The report, PDF, and CSV are still produced; give the user their paths (in Cowork, the files the user can download).
 
 1. **Workspace.** If the user named an applications folder: `<that folder>/_screen/`. Otherwise `~/candidate-screens/<YYYY-MM-DD-HHMM>/`.
 2. **Start it** (Bash, `run_in_background: true`; it runs until killed):
    `python3 $A serve --workspace <W> [--apps <folder the user named>]`
-   It opens the browser and prints the URL. Tell the user in one line: the GUI is open, fill in the posting and applications, then click Draft requirements. Give the URL in case the tab did not open.
+   Read the first lines of its output: the URL and `browser: opened` or `browser: NOT OPENED`. If not opened, switch to chat-only mode as above. Otherwise tell the user in one line: the app is open, fill in the posting and applications, then click Draft requirements. Give the URL in case the tab did not come to the front.
 3. **Wait for intake** (Bash, `run_in_background: true`; you are notified when it exits, do not poll):
-   `python3 $A wait --workspace <W> --stage intake_submitted`
+   `python3 $A wait --workspace <W> --stage intake_submitted --timeout 1800`
+   If it times out (output has `"timeout": true`), ask the user whether the app loaded. If not, stop the server and continue in chat-only mode.
    Its output includes `intake`: `posting_file` (pasted text is already saved as `<W>/posting.txt`) or `posting_url`, `role`, `company`, `app_paths`, `web_checks`, `legal_requirement`. These answer Step 1's questions; do not ask them again in chat.
 4. `python3 $A stage --workspace <W> --stage drafting`, then do Step 2. Instead of asking for confirmation in chat, write `requirements.json` (you may add a top-level `"notes"` list: one line per must-have you moved to nice-to-have and why; the GUI shows them), run `python3 $A stage --workspace <W> --stage requirements_review`, and wait again in the background with `--stage approved`. The user edits and approves in the GUI; re-read `requirements.json` afterward because they may have changed it.
 5. Keep the GUI current as you go:

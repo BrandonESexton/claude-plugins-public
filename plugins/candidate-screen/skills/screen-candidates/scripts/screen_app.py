@@ -308,14 +308,30 @@ def make_handler(app):
     return H
 
 
+def has_display():
+    """False in a headless Linux sandbox (Claude Cowork, containers), where only console browsers could start."""
+    if sys.platform.startswith("linux"):
+        return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+    return True
+
+
 def cmd_serve(a):
     app = App(a.workspace, a.apps)
     srv = ThreadingHTTPServer(("127.0.0.1", a.port), make_handler(app))
     url = f"http://127.0.0.1:{srv.server_address[1]}/?t={app.token}"
     save_state(app.ws, url=url)
     print(f"GUI: {url}\nworkspace: {app.ws}", flush=True)
-    if not a.no_open:
-        webbrowser.open(url)
+    if a.no_open:
+        print("browser: skipped (--no-open)", flush=True)
+    else:
+        opened = False
+        if has_display():
+            try:
+                opened = webbrowser.open(url)
+            except webbrowser.Error:
+                opened = False
+        # A sandbox (Claude Cowork, a remote container) has no browser, so the user cannot reach this server.
+        print("browser: opened" if opened else "browser: NOT OPENED (no local browser; use chat mode)", flush=True)
 
     def idle():
         while True:

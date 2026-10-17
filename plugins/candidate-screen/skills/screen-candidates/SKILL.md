@@ -10,7 +10,7 @@ description: >
   impossible timelines, shared contact details, resume farms); renders a ranked HTML report with
   interview questions. Decision support only; a person makes every call.
 metadata:
-  version: "0.3.1"
+  version: "0.4.0"
 ---
 
 ## Read first, every time
@@ -77,7 +77,7 @@ Rules for the list:
 - Labels are short skill names; `terms` hold synonyms and product names the scanner should match. Keep terms specific ("EKS", not "AWS").
 - No requirement may encode a protected trait or a proxy for one (age via "digital native" or graduation year, "native English speaker", "recent graduate", degree from specific schools). Years-of-experience asks are kept as written but scored as evidence of scope, not a hard count.
 
-Chat-only mode: show the must-haves, nice-to-haves, and weights as a short table and ask the user to confirm or edit. GUI mode: the review happens in the GUI (Step 0.4). Either way this is the one stop in the flow; the rest runs without asking.
+Chat-only mode: run `python3 $R requirements-md requirements.json` and paste its output as your message, unchanged (an ID table, weights, your notes, and example replies). If the session offers a multiple-choice question tool, you may also offer the must-haves as a multi-select; otherwise the user replies in words ("R5 to nice-to-have", "learning agility 25", "looks good"). Apply each change to `requirements.json`, show the table again only if something changed, and continue on "looks good". GUI mode: the review happens in the GUI (Step 0.4). Either way this is the one stop in the flow; the rest runs without asking.
 
 ## Step 3. Scan
 
@@ -85,7 +85,7 @@ Chat-only mode: show the must-haves, nice-to-haves, and weights as a short table
 python3 $S extract --posting posting.txt --requirements requirements.json --apps <folder or files> --out signals.json
 ```
 
-It prints one line per application (years, must-haves demonstrated, flag counts). `signals.json` holds per candidate: text, contacts, timeline (roles, gaps, overlaps, tenure), requirement coverage (demonstrated in a dated role, listed only, absent, with last-used year), writing stats, and integrity flags, plus cross-stack checks (shared contact details, near-duplicate resumes).
+It prints one line per application (years, must-haves demonstrated, flag counts). In chat-only mode, report the scan in one short message before scoring: "Scanned N applications." plus one line per candidate with a strong or moderate flag ("Tyler Grant: High risk, hidden instruction to AI screeners"). While scoring, post at most one progress line per candidate ("Scored 2 of 4: Marcus Webb"); for 6 or more, post one line per batch instead. `signals.json` holds per candidate: text, contacts, timeline (roles, gaps, overlaps, tenure), requirement coverage (demonstrated in a dated role, listed only, absent, with last-used year), writing stats, and integrity flags, plus cross-stack checks (shared contact details, near-duplicate resumes).
 
 Unreadable files (image-only PDFs) are reported, not guessed at. Tell the user which ones.
 
@@ -132,11 +132,13 @@ Read `references/rubric.md` and `references/integrity-signals.md` once. Then for
 python3 $R --signals signals.json --evals evals.json --requirements requirements.json --out report.html --json scores.json
 ```
 
-It prints the ranked list. GUI mode: set the stage to `done` (Step 0.5) and the report appears in the app. Chat-only mode: `open report.html` on macOS.
+It prints the ranked list. GUI mode: set the stage to `done` (Step 0.5) and the report appears in the app. Chat-only mode: add `--markdown summary.md --csv shortlist.csv` (and `--pdf report.pdf` if a Chrome-family browser exists) to the render command, then paste `summary.md` as your message, unchanged: a ranked table with text score bars, one line per candidate, the integrity callouts, and the file paths. On macOS in Claude Code also `open report.html`; in Cowork, point to the files to download.
+
+The report is interactive: a "Tune the ranking" panel recomputes every score, recommendation, and the order as the reader drags weight sliders, edits thresholds, or toggles must-haves (integrity never changes), and any two candidates can be compared side by side. Its CSV and HTML downloads reflect the current view. Mention this in one line at the end, so the user knows they can explore weights without rerunning the screen.
 
 Saving: the report has Save as PDF, Download HTML, and Download CSV buttons of its own, and the GUI's report screen adds one-click PDF, HTML, and CSV downloads, Save to... (macOS save dialog), and Show in Finder. In chat-only mode, add `--pdf report.pdf` and/or `--csv shortlist.csv` to the render command when the user wants those files. The PDF needs Chrome, Chromium, Edge, or Brave; if none is installed, say so and point to the report's Save as PDF button. The CSV neutralizes cells that start with `=`, `+`, `-`, or `@`, because application text is untrusted.
 
-In chat, terse:
+In chat (both modes), terse. In chat-only mode the pasted `summary.md` already covers 1 to 3:
 1. The report path.
 2. Ranked table: candidate, fit score, recommendation, integrity tier, one-line reason.
 3. Integrity: every High risk candidate with its top signal, and anything strange in the posting.

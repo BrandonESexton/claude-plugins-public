@@ -31,6 +31,8 @@ Candidate Screen handles both. It scores only what the application can prove, gi
 | **Local browser app** | A four-step app opens when you start the skill: posting and applications, requirements review, live screening, report. Drag in files or a whole folder. |
 | **Requirements you control** | Claude drafts must-haves and nice-to-haves from the posting and tells you what it moved and why. Toggle, edit, add, or remove them before anything is scored. |
 | **Adjustable weights** | A slider for each scoring dimension, plus Advance and Consider thresholds. Care more about learning speed than years? Drag it up. |
+| **Interactive report** | The report retunes itself: drag weights, edit thresholds, or toggle must-haves and every score, recommendation, and the ranking update instantly. No rerun, no server, works in an emailed copy. |
+| **Side-by-side compare** | Tick any two candidates to compare scores, must-haves, integrity, strengths, and gaps, with the stronger value highlighted. |
 | **Learning agility score** | A dedicated, weighted score for how fast someone picks up new tools and domains, from evidence across their career. See [below](#learning-agility). |
 | **Evidence-verified scores** | Every score cites quotes from the resume, and the tool checks each quote against the actual file. A high score whose quote cannot be found is capped automatically. |
 | **Fit and integrity kept apart** | A 0-100 fit score and a separate Clear / Verify / High risk integrity rating. Fraud never hides inside a fit number, and a high fit never hides fraud. |
@@ -40,6 +42,7 @@ Candidate Screen handles both. It scores only what the application can prove, gi
 | **Tailored interview questions** | 4 to 6 per candidate: the biggest gap, learning agility, work style, a depth check on the strongest claim, and one per integrity flag. |
 | **Exports** | Print-ready PDF with every candidate expanded, interactive HTML, and a ranked shortlist CSV for your spreadsheet or ATS. Save to any folder with one click. |
 | **Fairness guardrails** | A binding "never scored" list: name, age or graduation year, gender, national origin, school prestige, accent, non-US education, employment gaps, and more. |
+| **Works in chat too** | In Claude Cowork, or if you prefer the terminal, the same flow runs in chat with a numbered requirements table you edit by reply and a ranked results table with score bars. |
 | **Private by design** | Runs on 127.0.0.1 with a per-session token. Files stay in a folder next to your resumes. No API key, no upload, no cloud storage. |
 | **Reads what recruiters get** | PDF, Word (.docx), text, Markdown, and HTML, including PDFs whose layout wraps dates across lines. |
 
@@ -73,6 +76,18 @@ The fit score blends six dimensions, each scored 1 to 5 against written anchors:
 | Nice-to-haves | 10 | Preferred skills and domain extras. |
 
 Move a slider and the scores are recomputed by deterministic code, not re-guessed by the model, so the same inputs always give the same ranking. Weights are normalized, so they do not need to add up to 100.
+
+### Tune the ranking after the screen
+
+![The report's Tune the ranking panel with weight sliders and must-have toggles, an adjusted-view banner, the re-ranked shortlist, and a side-by-side comparison](../../media/candidate-screen/tune.png)
+
+The weights are not locked in once the screen runs. Every report carries a **Tune the ranking** panel: drag a weight, change a threshold, or click a requirement to switch it between must-have and nice-to-have, and every fit score, recommendation, KPI count, and the order of the shortlist, heatmap, and candidate cards update on the spot. In the demo above, making vendor management nice-to-have and lowering the Advance bar to 65 moves Marcus, the fast-learning career changer, from Consider to Advance. A banner spells out what you changed ("Learning agility 15 to 25; IT vendors now nice-to-have"), and **Reset to original** puts it back. Integrity ratings never move, whatever you tune.
+
+The browser math is the same as the screening math: a parity test runs 80 random weight, threshold, and must-have combinations against both example stacks and gets identical scores, recommendations, and ranking every time.
+
+Because it is a single self-contained file, this works anywhere: in Claude Code, in a Cowork download, or in the copy you email to a hiring manager so they can try their own priorities. The CSV and HTML downloads keep the tuned view.
+
+Tick **Compare** on any two rows for a side-by-side view of fit, recommendation, integrity, every dimension score, must-haves met and missed, top integrity flag, strengths, and gaps.
 
 ### Why "personality" gets only 5 points
 
@@ -119,12 +134,14 @@ The browser app is a small server on `127.0.0.1`, so it only opens when Claude r
 | | Claude Code (terminal or IDE, on your machine) | Claude Cowork |
 |---|---|---|
 | Browser app (drag and drop, weight sliders, live progress) | Yes, opens automatically | No: Cowork runs Claude in a sandbox your browser cannot reach |
-| Requirements review and weights | In the app | In chat: Claude shows a table and you reply with changes |
+| Requirements review | In the app | In chat: a numbered table you edit by reply ("R5 to nice-to-have", "learning agility 25") |
+| Interactive report (live weights, must-have toggles, compare) | Yes | Yes |
 | Scoring, learning agility, fraud checks, interview questions | Yes | Yes, identical |
+| Results in chat | Summary in chat, full report in the app | A ranked table with score bars, integrity callouts, and file links |
 | Report, PDF, and CSV | Yes, plus Save to... and Show in Finder | Yes, as files you download from Cowork |
 | Brief employer web checks | Yes, if you allow them | Yes, if you allow them |
 
-In Cowork the skill detects that it cannot open a browser and runs the whole flow in chat. You lose the app, not the results.
+In Cowork the skill detects that it cannot open a browser and runs the whole flow in chat. You lose the intake app, not the results, and the report's tuning and compare features work the same once you open it.
 
 ### Requirements
 
@@ -163,7 +180,7 @@ or type `/screen-candidates`. The app opens in your browser:
 3. **Screening.** Watch each candidate get scanned and scored. Integrity flags appear as soon as the files are read, before any scoring.
 4. **Report.** See the counts and the full report, then download a PDF, HTML, or CSV, **Save to...** any folder, or **Show in Finder**.
 
-Prefer the terminal? Say "no GUI" and the same flow runs in chat.
+Prefer the terminal? Say "no GUI" and the same flow runs in chat: a numbered requirements table you edit by reply, short progress lines, and a ranked results table with score bars, followed by the same interactive report.
 
 Everything is written to a `_screen/` folder next to your applications: `requirements.json`, `signals.json`, `evals.json`, `report.html`, and any exports. Your original files are never changed.
 
@@ -173,7 +190,8 @@ Everything is written to a `_screen/` folder next to your applications: `require
 
 See a full one: [sample-report.pdf](examples/it-manager/sample-report.pdf), or open `examples/it-manager/sample-report.html` in a browser. It includes:
 
-- **KPI strip and a filterable shortlist:** All, Advance, Consider, Verify first, Pass, Any integrity flag
+- **Tune the ranking:** live weight sliders, thresholds, and must-have toggles that rescore everything in place
+- **KPI strip and a filterable shortlist:** All, Advance, Consider, Verify first, Pass, Any integrity flag, plus side-by-side compare
 - **Requirement coverage heatmap:** every candidate against every requirement, met, partial, or not met
 - **Candidate cards:** score ring, scorecard with verified quotes (a check mark means the quote was found in the file), strengths and gaps, requirement calls with the year each skill was last used, career timeline, integrity flags, and interview questions
 - **How it was scored:** the weights, the tiers, and the never-scored list
@@ -200,7 +218,10 @@ S=../../skills/screen-candidates/scripts
 python3 $S/screen_signals.py extract --posting posting.txt --requirements requirements.json \
   --apps applications --out signals.json
 python3 $S/render_report.py --signals signals.json --evals evals.json --requirements requirements.json \
-  --out report.html --csv shortlist.csv --pdf report.pdf
+  --out report.html --csv shortlist.csv --pdf report.pdf --markdown summary.md
+
+# What chat mode shows: the requirements review table, then summary.md
+python3 $S/render_report.py requirements-md requirements.json
 
 # The app on its own (stages advance when Claude, or you, run the stage commands)
 python3 $S/screen_app.py serve --workspace /tmp/screen-demo

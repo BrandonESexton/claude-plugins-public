@@ -3,7 +3,8 @@
 
   render_report.py --signals signals.json --evals evals.json --requirements requirements.json \
                    --out report.html [--title "..."] [--json scores.json]
-  render_report.py ... [--csv shortlist.csv] [--pdf report.pdf]
+  render_report.py ... [--csv shortlist.csv] [--pdf report.pdf] [--markdown summary.md]
+  render_report.py requirements-md requirements.json     chat-mode requirements review table
   render_report.py selftest
 
 The math lives here, not in the model:
@@ -94,7 +95,7 @@ def score_candidate(sig, ev, reqs, weights, thresholds):
         dims.append({"key": key, "label": label, "desc": desc, "weight": w, "score": raw, "used": used,
                      "capped": capped, "confidence": d.get("confidence", "low" if key == "work_style" else "medium"),
                      "rationale": d.get("rationale", ""), "quotes": quotes})
-    score = round(100 * total / wsum) if wsum else 0
+    score = int(100 * total / wsum + 0.5) if wsum else 0  # half-up, same as the report's live rescoring
 
     cov = sig.get("coverage", {})
     req_status = {}
@@ -260,12 +261,13 @@ def card(c, rank, reqs, open_):
         ("Must-haves met", musts_cell(c)),
         ("Profiles", " ".join(links) or "none listed"),
     ]
-    facts_html = "".join(f'<div class="fact"><span>{esc(k)}</span><b>{v if k == "Profiles" else esc(v)}</b></div>' for k, v in facts)
+    facts_html = "".join(f'<div class="fact"><span>{esc(k)}</span><b{" class=js-musts" if k == "Must-haves met" else ""}>'
+                         f'{v if k == "Profiles" else esc(v)}</b></div>' for k, v in facts)
     buzz = wr.get("buzzwords") or []
     buzz_html = (f'<p class="muted small">Buzzwords: {esc(", ".join(buzz))}</p>' if len(buzz) >= 3 else "")
     reqs_html = "".join(
         f'<li>{chip(REQ_CELL[c["req_status"][r["id"]]["status"]][2], REQ_CELL[c["req_status"][r["id"]]["status"]][0])}'
-        f'{"<b>MUST</b> " if r.get("must") else ""}{esc(r["label"])}'
+        f'<b class="mustlbl" data-req="{esc(r["id"])}"{"" if r.get("must") else " hidden"}>MUST</b> {esc(r["label"])}'
         f'<span class="muted small"> scanner: {esc(c["req_status"][r["id"]]["scanner"])}'
         f'{", last used " + esc(c["req_status"][r["id"]]["last_used"]) if c["req_status"][r["id"]]["last_used"] else ""}'
         f'{" (reviewer call)" if c["req_status"][r["id"]]["reviewer"] else ""}</span></li>' for r in reqs)
@@ -273,9 +275,9 @@ def card(c, rank, reqs, open_):
     return f'''
 <details class="card" id="c-{esc(c["id"])}" data-rec="{esc(c["rec"])}" data-tier="{esc(c["tier"])}"{" open" if open_ else ""}>
 <summary>
-  <span class="rank">#{rank}</span>{ring(c["score"])}
+  <span class="rank js-rank">#{rank}</span>{ring(c["score"])}
   <span class="who"><b>{esc(c["name"])}</b><span class="muted">{esc(c["headline"])}</span></span>
-  <span class="chips">{chip(c["rec"], REC_STATUS[c["rec"]])}{chip("Integrity: " + c["tier"], TIER_STATUS[c["tier"]])}</span>
+  <span class="chips"><span class="js-rec">{chip(c["rec"], REC_STATUS[c["rec"]])}</span>{chip("Integrity: " + c["tier"], TIER_STATUS[c["tier"]])}</span>
 </summary>
 <div class="card-body">
   <div class="facts">{facts_html}</div>{buzz_html}
@@ -300,7 +302,7 @@ def card(c, rank, reqs, open_):
 
 def heatmap(cands, reqs):
     head = "".join(f'<th scope="col" title="{esc(r.get("text", r["label"]))}"><span>{esc(r["label"])}</span>'
-                   f'{"<em>must</em>" if r.get("must") else ""}</th>' for r in reqs)
+                   f'<em data-req="{esc(r["id"])}"{"" if r.get("must") else " hidden"}>must</em></th>' for r in reqs)
     rows = []
     for c in cands:
         cells = []
@@ -310,7 +312,7 @@ def heatmap(cands, reqs):
             cells.append(f'<td class="hm st-{k}" title="{esc(c["name"])} / {esc(r["label"])}: {lab}'
                          f'{" (last used " + esc(st["last_used"]) + ")" if st["last_used"] else ""}">'
                          f'<span aria-label="{lab}">{g}</span></td>')
-        rows.append(f'<tr><th scope="row"><a href="#c-{esc(c["id"])}">{esc(c["name"])}</a></th>{"".join(cells)}</tr>')
+        rows.append(f'<tr data-id="{esc(c["id"])}"><th scope="row"><a href="#c-{esc(c["id"])}">{esc(c["name"])}</a></th>{"".join(cells)}</tr>')
     return (f'<div class="hm-wrap"><table class="heat"><thead><tr><th></th>{head}</tr></thead>'
             f'<tbody>{"".join(rows)}</tbody></table></div>'
             f'<div class="legend">{chip("Met: done in a dated role", "good")}{chip("Partial: listed, not shown in a role", "warning")}'
@@ -322,16 +324,18 @@ def leaderboard(cands):
     for i, c in enumerate(cands, 1):
         la = next((d["used"] for d in c["dims"] if d["key"] == "learning_agility"), None)
         rows.append(
-            f'<tr data-rec="{esc(c["rec"])}" data-tier="{esc(c["tier"])}"><td class="num">{i}</td>'
+            f'<tr data-id="{esc(c["id"])}" data-rec="{esc(c["rec"])}" data-tier="{esc(c["tier"])}"><td class="num js-rank">{i}</td>'
             f'<td><a href="#c-{esc(c["id"])}"><b>{esc(c["name"])}</b></a><div class="muted small">{esc(c["headline"])}</div></td>'
             f'<td class="scorecell"><div class="sbar" title="Fit {c["score"]}/100"><span style="width:{c["score"]}%"></span></div>'
-            f'<b class="num">{c["score"]}</b></td>'
-            f'<td class="num">{musts_cell(c)}</td>'
+            f'<b class="num js-score">{c["score"]}</b></td>'
+            f'<td class="num js-musts">{musts_cell(c)}</td>'
             f'<td class="num">{esc(la if la is not None else "n/a")}</td>'
-            f'<td>{chip(c["rec"], REC_STATUS[c["rec"]])}</td>'
-            f'<td>{chip(c["tier"], TIER_STATUS[c["tier"]])}</td></tr>')
+            f'<td class="js-rec">{chip(c["rec"], REC_STATUS[c["rec"]])}</td>'
+            f'<td>{chip(c["tier"], TIER_STATUS[c["tier"]])}</td>'
+            f'<td class="cmpcell"><label class="cmp" title="Compare side by side"><input type="checkbox" value="{esc(c["id"])}">'
+            f'<span>Compare</span></label></td></tr>')
     return ('<div class="tbl-wrap"><table class="lb"><thead><tr><th>#</th><th>Candidate</th><th>Fit score</th>'
-            '<th>Must-haves</th><th>Learning agility</th><th>Recommendation</th><th>Integrity</th></tr></thead>'
+            '<th>Must-haves</th><th>Learning agility</th><th>Recommendation</th><th>Integrity</th><th class="cmpcell"></th></tr></thead>'
             f'<tbody>{"".join(rows)}</tbody></table></div>')
 
 
@@ -453,6 +457,27 @@ ul.pros,ul.cons{padding-left:18px;margin:0}ul.pros li,ul.cons li{margin:3px 0}
 .lb .muted.small,.lb th:nth-child(5),.lb td:nth-child(5){display:none}.sbar{width:56px}.scorecell{min-width:0}
 th,td{padding:8px}.card summary{gap:10px}.rank{width:auto}.kpi b{font-size:26px}}
 footer{margin-top:40px;font-size:12px;color:var(--muted)}
+[hidden]{display:none!important}
+.tune{margin:0 0 14px}.tune summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;list-style:none}
+.tune summary::-webkit-details-marker{display:none}.tune summary b{font-size:16px}.tune summary b:before{content:"\25B8  ";color:var(--muted)}
+.tune[open] summary b:before{content:"\25BE  "}
+.tune-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;margin-top:6px}@media(max-width:820px){.tune-grid{grid-template-columns:1fr}}
+.sliders{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px}@media(max-width:520px){.sliders{grid-template-columns:1fr}}
+.tw label{display:flex;justify-content:space-between;font-size:13px;font-weight:600}.tw output{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.tw input{width:100%;accent-color:var(--series)}
+.mtoggles{display:flex;flex-wrap:wrap;gap:6px}
+.mt{font:inherit;font-size:12px;border:1px solid var(--border);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:4px 10px;cursor:pointer}
+.mt[aria-pressed="true"]{background:color-mix(in srgb,var(--critical) 14%,transparent);border-color:color-mix(in srgb,var(--critical) 45%,transparent);color:var(--crit-ink);font-weight:600}
+.mt[aria-pressed="true"]:before{content:"MUST  ";font-size:10px;font-weight:700}
+.thr{display:flex;gap:16px;flex-wrap:wrap;font-size:13px}.thr input{width:70px;font:inherit;padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:var(--page);color:var(--ink);margin-left:6px}
+.tune-note{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:color-mix(in srgb,var(--warning) 18%,transparent);border-left:3px solid var(--warning);border-radius:8px;padding:8px 12px;margin:0 0 14px;font-size:13px}
+.tune-note button,#cmp-clear{font:inherit;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer;margin-left:auto}
+.cmpcell{white-space:nowrap}.cmp{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2);cursor:pointer}.cmp input{accent-color:var(--series)}
+.compare{margin-top:12px}.cmp-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+.cmp-t th[scope=row]{width:26%;font-size:13px;font-weight:600;color:var(--ink-2)}.cmp-t td{width:37%;font-size:14px}.cmp-t ul{margin:0;padding-left:16px}
+.cmp-t td.best{background:color-mix(in srgb,var(--good) 10%,transparent)}
+.mini{display:inline-block;width:60px;height:6px;background:var(--surface-2);border-radius:3px;margin-right:8px;vertical-align:middle;overflow:hidden}
+.mini span{display:block;height:100%;background:var(--series)}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .toolbar button{font:inherit;font-size:13px;font-weight:600;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px;cursor:pointer}
 .toolbar button:hover{background:rgba(255,255,255,.28)}
@@ -461,7 +486,7 @@ footer{margin-top:40px;font-size:12px;color:var(--muted)}
 --good-ink:#006300;--warn-ink:#7a5200;--crit-ink:#a32020}
 body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 @page{size:letter;margin:12mm}
-.hero{background:none;color:#000;padding:16px 0}.toggle,.filters,.toolbar{display:none}
+.hero{background:none;color:#000;padding:16px 0}.screen-only,.toggle,.filters,.toolbar,.tune,.tune-note button,.cmpcell,.compare{display:none}
 .kpis{margin-top:0;grid-template-columns:repeat(5,1fr)}.kpi{box-shadow:none;padding:10px 12px}.kpi b{font-size:24px}
 .lb .muted.small{display:none}.lb td,.lb th{padding:6px 8px}.sbar{width:70px}.scorecell{min-width:0}h2{break-after:avoid}
 .card{break-inside:avoid}details.card>.card-body{display:block}}
@@ -475,14 +500,12 @@ JS = r"""
     var dark=root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
     var next=dark?'light':'dark';root.setAttribute('data-theme',next);try{localStorage.setItem('cs-theme',next);}catch(e){}
   });
-  var fb=document.querySelectorAll('.filters button');
+  var fb=document.querySelectorAll('.filters button'),curF='all';
+  function filt(){document.querySelectorAll('[data-rec]').forEach(function(el){
+    var show=curF==='all'||el.dataset.rec===curF||(curF==='flagged'&&el.dataset.tier!=='Clear');
+    el.classList.toggle('hidden-row',!show);})}
   fb.forEach(function(b){b.addEventListener('click',function(){
-    fb.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
-    var f=b.dataset.f;
-    document.querySelectorAll('[data-rec]').forEach(function(el){
-      var show=f==='all'||el.dataset.rec===f||(f==='flagged'&&el.dataset.tier!=='Clear');
-      el.classList.toggle('hidden-row',!show);
-    });
+    fb.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});curF=b.dataset.f;filt();
   })});
   function openAll(){document.querySelectorAll('details.card').forEach(function(d){d.open=true})}
   window.addEventListener('beforeprint',openAll);
@@ -493,10 +516,100 @@ JS = r"""
   function dl(name,type,data){var b=new Blob([data],{type:type}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;
     document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)}
   function on(id,fn){var el=document.getElementById(id);if(el)el.addEventListener('click',fn)}
+  // ---------------------------------------------------------------- live rescoring
+  var D=meta,RK={'Advance':0,'Consider':1,'Verify first':2,'Pass':3,'Unreadable':4};
+  var RS={'Advance':'good','Consider':'warning','Pass':'neutral','Verify first':'critical','Unreadable':'neutral'};
+  var TS={'Clear':'good','Verify':'warning','High risk':'critical'};
+  var IC={good:'✓',warning:'!',critical:'✕',neutral:'–'};
+  function esc(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function chip(l,st){return '<span class="chip st-'+st+'"><span class="ic" aria-hidden="true">'+IC[st]+'</span>'+esc(l)+'</span>'}
+  function clone(o){return JSON.parse(JSON.stringify(o))}
+  var S=D.tuned?clone(D.tuned):{w:clone(D.orig.weights),t:clone(D.orig.thresholds),must:clone(D.orig.must)};
+  var R={};
+  function score(c){
+    var tot=0,ws=0;D.dims.forEach(function(d){var v=c.dims[d.key],w=+S.w[d.key]||0;
+      if(typeof v==='number'&&w){v=Math.max(1,Math.min(5,v));tot+=w*(v-1)/4;ws+=w}});
+    var sc=ws?Math.floor(100*tot/ws+0.5):0;
+    var musts=D.reqs.filter(function(r){return S.must[r.id]});
+    var missed=musts.filter(function(r){return c.req[r.id]==='not_met'}),part=musts.filter(function(r){return c.req[r.id]==='partial'});
+    var rec=!c.readable?'Unreadable':c.tier==='High risk'?'Verify first':(sc>=S.t.advance&&!missed.length)?'Advance':
+      (sc>=S.t.consider&&missed.length<=1)?'Consider':'Pass';
+    return {score:sc,rec:rec,met:musts.length-missed.length-part.length,partial:part.length,total:musts.length,
+      missed:missed.map(function(r){return r.label})}}
+  function mustsTxt(r){return r.met+'/'+r.total+(r.partial?' +'+r.partial+' partial':'')}
+  function ranked(){return D.cands.slice().sort(function(a,b){var x=R[a.id],y=R[b.id];
+    return (RK[x.rec]-RK[y.rec])||(y.score-x.score)||(a.order-b.order)})}
+  var CIRC=2*3.14159*26;
+  function apply(){
+    D.cands.forEach(function(c){R[c.id]=score(c)});
+    var order=ranked(),lb=document.querySelector('.lb tbody'),cards=document.getElementById('cards'),hm=document.querySelector('.heat tbody');
+    order.forEach(function(c,i){var r=R[c.id],sel='[data-id="'+c.id+'"]';
+      var tr=lb&&lb.querySelector('tr'+sel);
+      if(tr){tr.dataset.rec=r.rec;tr.querySelector('.js-rank').textContent=i+1;tr.querySelector('.js-score').textContent=r.score;
+        var sb=tr.querySelector('.sbar');sb.title='Fit '+r.score+'/100';sb.firstChild.style.width=r.score+'%';
+        tr.querySelector('.js-musts').textContent=mustsTxt(r);tr.querySelector('.js-rec').innerHTML=chip(r.rec,RS[r.rec]);lb.appendChild(tr)}
+      var cd=document.getElementById('c-'+c.id);
+      if(cd){cd.dataset.rec=r.rec;cd.querySelector('.js-rank').textContent='#'+(i+1);cd.querySelector('.js-rec').innerHTML=chip(r.rec,RS[r.rec]);
+        var rv=cd.querySelector('.ring-val');rv.setAttribute('stroke-dashoffset',(CIRC*(1-r.score/100)).toFixed(1));
+        cd.querySelector('.ring text').textContent=r.score;cd.querySelector('.ring').setAttribute('aria-label','Fit score '+r.score);
+        var m=cd.querySelector('.js-musts');if(m)m.textContent=mustsTxt(r);if(cards)cards.appendChild(cd)}
+      var hr=hm&&hm.querySelector('tr'+sel);if(hr)hm.appendChild(hr)});
+    document.querySelectorAll('[data-req]').forEach(function(el){if(el.matches('em,.mustlbl'))el.hidden=!S.must[el.dataset.req]});
+    var cnt=function(x){return D.cands.filter(function(c){return R[c.id].rec===x}).length};
+    var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v};
+    set('kpi-advance',cnt('Advance'));set('kpi-consider',cnt('Consider'));set('kpi-pass',cnt('Pass'));
+    var sc=D.cands.filter(function(c){return R[c.id].rec!=='Unreadable'}).map(function(c){return R[c.id].score}).sort(function(a,b){return a-b});
+    var med=!sc.length?0:sc.length%2?sc[(sc.length-1)/2]:Math.floor((sc[sc.length/2-1]+sc[sc.length/2])/2+0.5);set('kpi-median','median fit '+med);
+    D.dims.forEach(function(d){set('w-'+d.key,S.w[d.key]);set('tv-'+d.key,S.w[d.key]);var i=document.getElementById('tw-'+d.key);if(i)i.value=S.w[d.key]});
+    set('th-adv',S.t.advance);set('th-con',S.t.consider);
+    var ta=document.getElementById('t-adv'),tc=document.getElementById('t-con');if(ta&&document.activeElement!==ta)ta.value=S.t.advance;if(tc&&document.activeElement!==tc)tc.value=S.t.consider;
+    document.querySelectorAll('.mt').forEach(function(b){b.setAttribute('aria-pressed',S.must[b.dataset.req]?'true':'false')});
+    // what changed
+    var ch=[];D.dims.forEach(function(d){if(+S.w[d.key]!==+D.orig.weights[d.key])ch.push(d.label+' '+D.orig.weights[d.key]+' → '+S.w[d.key])});
+    if(+S.t.advance!==+D.orig.thresholds.advance)ch.push('Advance at '+S.t.advance);
+    if(+S.t.consider!==+D.orig.thresholds.consider)ch.push('Consider at '+S.t.consider);
+    D.reqs.forEach(function(r){if(!!S.must[r.id]!==!!D.orig.must[r.id])ch.push(r.label+(S.must[r.id]?' now a must-have':' now nice-to-have'))});
+    var note=document.getElementById('tune-note');if(note){note.hidden=!ch.length;set('tune-text','Adjusted view: '+ch.join('; ')+'. Scores and recommendations reflect these settings, not the original screen.')}
+    filt();renderCmp()}
+  document.querySelectorAll('#tune input[type=range]').forEach(function(i){i.addEventListener('input',function(){S.w[i.dataset.k]=+i.value;apply()})});
+  [['t-adv','advance'],['t-con','consider']].forEach(function(p){var i=document.getElementById(p[0]);
+    if(i)i.addEventListener('input',function(){var v=parseInt(i.value,10);if(!isNaN(v)){S.t[p[1]]=Math.max(0,Math.min(100,v));apply()}})});
+  document.querySelectorAll('.mt').forEach(function(b){b.addEventListener('click',function(){S.must[b.dataset.req]=!S.must[b.dataset.req];apply()})});
+  on('tune-reset',function(){S={w:clone(D.orig.weights),t:clone(D.orig.thresholds),must:clone(D.orig.must)};apply()});
+  // ---------------------------------------------------------------- compare
+  var picks=[];
+  document.querySelectorAll('.cmp input').forEach(function(cb){cb.addEventListener('change',function(){
+    if(cb.checked){picks.push(cb.value);if(picks.length>2){var old=picks.shift();var o=document.querySelector('.cmp input[value="'+old+'"]');if(o)o.checked=false}}
+    else picks=picks.filter(function(x){return x!==cb.value});renderCmp()})});
+  on('cmp-clear',function(){picks=[];document.querySelectorAll('.cmp input').forEach(function(c){c.checked=false});renderCmp()});
+  function renderCmp(){var box=document.getElementById('compare');if(!box)return;box.hidden=picks.length!==2;if(picks.length!==2)return;
+    var cs=picks.map(function(id){return D.cands.filter(function(c){return c.id===id})[0]});
+    var row=function(l,f,best){var v=cs.map(f),b='';if(best){var n=cs.map(best);if(n[0]!==n[1])b=n[0]>n[1]?0:1}
+      return '<tr><th scope="row">'+l+'</th>'+v.map(function(x,i){return '<td'+(i===b?' class="best"':'')+'>'+x+'</td>'}).join('')+'</tr>'};
+    var ul=function(xs){return xs&&xs.length?'<ul>'+xs.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':'<span class="muted">none</span>'};
+    var h='<table class="cmp-t"><thead><tr><th></th>'+cs.map(function(c){return '<th scope="col">'+esc(c.name)+'</th>'}).join('')+'</tr></thead><tbody>';
+    h+=row('Fit score',function(c){return '<b>'+R[c.id].score+'</b>'},function(c){return R[c.id].score});
+    h+=row('Recommendation',function(c){return chip(R[c.id].rec,RS[R[c.id].rec])});
+    h+=row('Integrity',function(c){return chip(c.tier,TS[c.tier])});
+    D.dims.forEach(function(d){h+=row(esc(d.label)+' <span class="muted small">w '+S.w[d.key]+'</span>',function(c){var v=c.dims[d.key];
+      return v==null?'n/a':'<span class="mini"><span style="width:'+(v/5*100)+'%"></span></span>'+v+'/5'},function(c){return c.dims[d.key]||0})});
+    h+=row('Must-haves',function(c){return mustsTxt(R[c.id])},function(c){return R[c.id].met});
+    h+=row('Missed must-haves',function(c){return R[c.id].missed.length?esc(R[c.id].missed.join(', ')):'<span class="muted">none</span>'});
+    h+=row('Top integrity flag',function(c){return c.top_flag?esc(c.top_flag):'<span class="muted">none</span>'});
+    h+=row('Strengths',function(c){return ul(c.strengths)});h+=row('Gaps',function(c){return ul(c.gaps)});
+    document.getElementById('cmp-body').innerHTML=h+'</tbody></table>'}
+  // ---------------------------------------------------------------- exports reflect the current view
+  function csvCell(v){var x=v==null?'':String(v);if(/^[=+\-@\t\r]/.test(x))x="'"+x;return /[",\n\r]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x}
+  function buildCSV(){var rows=[D.cols.join(',')];ranked().forEach(function(c,i){var r=R[c.id];
+    var v={rank:i+1,name:c.name,fit_score:r.score,recommendation:r.rec,integrity:c.tier,must_haves_met:r.met,must_haves_partial:r.partial,
+      must_haves_total:r.total,missed_must_haves:r.missed.join('; '),top_integrity_flag:c.top_flag,headline:c.headline,source_file:c.file};
+    D.dims.forEach(function(d){v[d.key]=c.dims[d.key]});rows.push(D.cols.map(function(k){return csvCell(v[k])}).join(','))});return rows.join('\n')+'\n'}
   on('dl-html',function(){var c=root.cloneNode(true);c.removeAttribute('data-theme');
     c.querySelectorAll('.hidden-row').forEach(function(el){el.classList.remove('hidden-row')});
-    dl(meta.base+'.html','text/html','<!doctype html>\n'+c.outerHTML)});
-  on('dl-csv',function(){dl(meta.base+'.csv','text/csv','\ufeff'+meta.csv)});
+    var dd=clone(D);dd.tuned=S;c.querySelector('#cs-data').textContent=JSON.stringify(dd).replace(/</g,'\\u003c');
+    dl(D.base+'.html','text/html','<!doctype html>\n'+c.outerHTML)});
+  on('dl-csv',function(){dl(D.base+'.csv','text/csv','﻿'+buildCSV())});
+  apply();
   on('dl-pdf',function(){openAll();window.print()});
 })();
 """
@@ -612,13 +725,110 @@ def make_pdf(html_path, pdf_path):
     return False, "PDF export failed: " + r.stderr.decode(errors="replace")[-300:]
 
 
+def report_data(signals, req, cands, weights, thresholds, reqs):
+    """Everything the report needs to rescore itself live in the browser."""
+    order = {s["id"]: i for i, s in enumerate(signals["candidates"])}
+    return {
+        "base": report_basename(req, signals),
+        "weights": weights, "thresholds": thresholds,
+        "orig": {"weights": weights, "thresholds": thresholds, "must": {r["id"]: bool(r.get("must")) for r in reqs}},
+        "reqs": [{"id": r["id"], "label": r["label"], "must": bool(r.get("must"))} for r in reqs],
+        "dims": [{"key": k, "label": l} for k, l, _ in DIMENSIONS],
+        "cols": CSV_COLS,
+        "cands": [{"id": c["id"], "name": c["name"], "headline": c["headline"], "order": order.get(c["id"], 0),
+                   "readable": c["sig"].get("readable", True), "tier": c["tier"],
+                   "dims": {d["key"]: d["used"] for d in c["dims"]},
+                   "req": {rid: v["status"] for rid, v in c["req_status"].items()},
+                   "top_flag": next((f.get("title") for f in c["flags"] if f.get("severity") in ("strong", "moderate")), ""),
+                   "strengths": c["strengths"], "gaps": c["gaps"],
+                   "file": Path(c["sig"].get("file", "")).name} for c in cands],
+    }
+
+
+def tune_panel(reqs, weights, thresholds):
+    sliders = "".join(
+        f'<div class="tw"><label for="tw-{k}">{esc(l)}<output id="tv-{k}">{weights.get(k, 0)}</output></label>'
+        f'<input type="range" id="tw-{k}" min="0" max="50" step="5" data-k="{k}" value="{weights.get(k, 0)}"></div>'
+        for k, l, _ in DIMENSIONS)
+    toggles = "".join(
+        f'<button type="button" class="mt" data-req="{esc(r["id"])}" aria-pressed="{"true" if r.get("must") else "false"}">'
+        f'{esc(r["label"])}</button>' for r in reqs)
+    return f'''<details class="panel tune" id="tune" open>
+  <summary><b>Tune the ranking</b><span class="muted small">Change the weights, thresholds, or must-haves. Scores, recommendations, and order update instantly. Integrity ratings never change.</span></summary>
+  <div class="tune-grid">
+    <div><h4>Weights</h4><div class="sliders">{sliders}</div></div>
+    <div><h4>Must-haves <span class="muted small">(click to toggle)</span></h4><div class="mtoggles">{toggles}</div>
+      <h4>Thresholds</h4><div class="thr"><label>Advance at <input type="number" id="t-adv" min="0" max="100" value="{thresholds["advance"]}"></label>
+      <label>Consider at <input type="number" id="t-con" min="0" max="100" value="{thresholds["consider"]}"></label></div></div>
+  </div>
+</details>
+<div class="tune-note" id="tune-note" hidden><span id="tune-text"></span><button type="button" id="tune-reset">Reset to original</button></div>'''
+
+
+def bar(score, width=10):
+    n = max(0, min(width, int(score / 100 * width + 0.5)))
+    return "\u2588" * n + "\u2591" * (width - n)
+
+
+def requirements_md(req):
+    """Chat-mode requirements review: a numbered table the user edits by reply."""
+    lines = [f"**{req.get('role', 'Role')}{', ' + req['company'] if req.get('company') else ''}: draft requirements**", "",
+             "| ID | Must-have | Requirement | Matches on |", "|---|---|---|---|"]
+    for r in req.get("requirements", []):
+        lines.append(f"| {r['id']} | {'yes' if r.get('must') else 'nice'} | {r['label']} | {', '.join(r.get('terms', [])[:8])} |")
+    w = {**DEFAULT_WEIGHTS, **req.get("weights", {})}
+    th = {**DEFAULT_THRESHOLDS, **req.get("thresholds", {})}
+    lines += ["", "Weights: " + " \u00b7 ".join(f"{l} {w.get(k, 0)}" for k, l, _ in DIMENSIONS)
+              + f". Advance at {th['advance']}, Consider at {th['consider']}."]
+    if req.get("notes"):
+        lines += ["", "Notes:"] + [f"- {n}" for n in req["notes"]]
+    lines += ["", 'Reply with changes, for example "R5 to nice-to-have", "add Okta as a must-have", '
+              '"learning agility 25", "advance at 70", or "looks good".']
+    return "\n".join(lines)
+
+
+def summary_md(signals, evals, req, files=None):
+    """Chat-mode results: ranked table with text score bars, integrity callouts, and file paths."""
+    cands = compute(signals, evals, req)[0]
+    count = lambda r: sum(1 for c in cands if c["rec"] == r)
+    title = f"{req.get('role', 'Role')}{', ' + req['company'] if req.get('company') else ''}"
+    lines = [f"**{title}: {len(cands)} application{'s' if len(cands) != 1 else ''} screened**",
+             f"Advance {count('Advance')} \u00b7 Consider {count('Consider')} \u00b7 Verify first {count('Verify first')}"
+             f" \u00b7 Pass {count('Pass')}" + (f" \u00b7 Unreadable {count('Unreadable')}" if count("Unreadable") else ""), "",
+             "| # | Candidate | Fit | Recommendation | Integrity | Must-haves | Learning agility |", "|---|---|---|---|---|---|---|"]
+    for i, c in enumerate(cands, 1):
+        la = next((d["used"] for d in c["dims"] if d["key"] == "learning_agility"), None)
+        lines.append(f"| {i} | **{c['name']}** | `{bar(c['score'])}` {c['score']} | {c['rec']} | {c['tier']} | "
+                     f"{musts_cell(c)} | {la if la is not None else 'n/a'}/5 |")
+    lines.append("")
+    for c in cands:
+        lines.append(f"- **{c['name']}:** {c['headline']}" + (f" Missed: {', '.join(c['missed'])}." if c["missed"] else ""))
+    flagged = [c for c in cands if c["tier"] != "Clear"]
+    if flagged:
+        lines += ["", "**Integrity**"]
+        for c in flagged:
+            top = [f for f in c["flags"] if f.get("severity") in ("strong", "moderate")][:3]
+            lines.append(f"- **{c['name']} ({c['tier']}):** " + "; ".join(f.get("title", "") for f in top) + ".")
+            nxt = ("Verify identity, contact details, and employers before any interview." if c["tier"] == "High risk"
+                   else (top[0].get("verify", "") if top else ""))
+            if nxt:
+                lines.append(f"  Next step: {nxt}")
+    unv = sum(c["unverified_quotes"] for c in cands)
+    if unv:
+        lines += ["", f"{unv} evidence quote(s) could not be found in the application text and were not counted."]
+    if files:
+        lines += ["", "**Files**"] + [f"- {k}: `{v}`" for k, v in files.items()]
+        lines.append("Open the HTML report to adjust weights and must-haves live and compare any two candidates.")
+    return "\n".join(lines)
+
+
 def render(signals, evals, req, title=None):
     cands, reqs, weights, thresholds, ev_by = compute(signals, evals, req)
     n = len(cands)
     count = lambda r: sum(1 for c in cands if c["rec"] == r)
     flagged = sum(1 for c in cands if c["tier"] != "Clear")
     scores = [c["score"] for c in cands if c["rec"] != "Unreadable"]
-    med = round(statistics.median(scores)) if scores else 0
+    med = int(statistics.median(scores) + 0.5) if scores else 0
     missing_evals = [s["id"] for s in signals["candidates"] if s["id"] not in ev_by]
     role = req.get("role", "Role")
     company = req.get("company", "")
@@ -628,7 +838,9 @@ def render(signals, evals, req, title=None):
     kpis = [("Applications", n, "", f"median fit {med}"), ("Advance", count("Advance"), "k-good", "score and must-haves clear"),
             ("Consider", count("Consider"), "k-warn", "worth a closer look"), ("Pass", count("Pass"), "", "below bar for this role"),
             ("Integrity flags", flagged, "k-crit", f'{count("Verify first")} need identity checks first')]
-    kpi_html = "".join(f'<div class="kpi {cls}"><span>{esc(k)}</span><b>{v}</b><i>{esc(sub)}</i></div>' for k, v, cls, sub in kpis)
+    kpi_ids = ["kpi-n", "kpi-advance", "kpi-consider", "kpi-pass", "kpi-flags"]
+    kpi_html = "".join(f'<div class="kpi {cls}"><span>{esc(k)}</span><b id="{kid}">{v}</b><i{" id=kpi-median" if kid == "kpi-n" else ""}>'
+                       f'{esc(sub)}</i></div>' for kid, (k, v, cls, sub) in zip(kpi_ids, kpis))
     posting_alert = ""
     if signals.get("posting_hidden"):
         posting_alert = ('<p class="alert">The job posting itself contains hidden text or an AI-directed instruction. '
@@ -641,11 +853,11 @@ def render(signals, evals, req, title=None):
                          for f, lbl in [("all", "All"), ("Advance", "Advance"), ("Consider", "Consider"),
                                         ("Verify first", "Verify first"), ("Pass", "Pass"), ("flagged", "Any integrity flag")])
                + "</div>")
-    cards = "".join(card(c, i, reqs, i <= 3) for i, c in enumerate(cands, 1))
-    wrows = "".join(f'<tr><td>{esc(l)}</td><td class="num">{weights.get(k, 0)}</td><td class="muted">{esc(d)}</td></tr>'
+    cards = '<div id="cards">' + "".join(card(c, i, reqs, i <= 3) for i, c in enumerate(cands, 1)) + "</div>"
+    wrows = "".join(f'<tr><td>{esc(l)}</td><td class="num" id="w-{k}">{weights.get(k, 0)}</td><td class="muted">{esc(d)}</td></tr>'
                     for k, l, d in DIMENSIONS)
     src = "".join(f'<li><a href="{esc(u)}" rel="noopener noreferrer" target="_blank">{esc(t)}</a></li>' for t, u in SOURCES)
-    data = json.dumps({"base": report_basename(req, signals), "csv": to_csv(csv_rows(cands))}).replace("<", "\\u003c")
+    data = json.dumps(report_data(signals, req, cands, weights, thresholds, reqs)).replace("<", "\\u003c")
 
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -661,8 +873,10 @@ def render(signals, evals, req, title=None):
 <main class="wrap">
   <div class="kpis">{kpi_html}</div>
   {posting_alert}{eval_alert}
-  <h2>Shortlist</h2><p class="sub">Ranked by recommendation, then fit score. Learning agility is shown on its own because it predicts ramp-up on what they do not know yet.</p>
+  <h2>Shortlist</h2><p class="sub">Ranked by recommendation, then fit score. Learning agility is shown on its own because it predicts ramp-up on what they do not know yet. <span class="screen-only">Tune the ranking below to see how it shifts.</span></p>
+  {tune_panel(reqs, weights, thresholds)}
   {filters}{leaderboard(cands)}
+  <div class="panel compare" id="compare" hidden><div class="cmp-head"><b>Side by side</b><span class="muted small">Tick Compare on any two rows.</span><button type="button" id="cmp-clear">Clear</button></div><div id="cmp-body"></div></div>
   <h2>Requirement coverage</h2><p class="sub">Met means the skill shows up inside a dated role, not just a skills list.</p>
   {heatmap(cands, reqs)}
   <h2>Candidates</h2><p class="sub">Every score carries a rationale and quotes. A check mark means the quote was found in the application; a question mark means it was not.</p>
@@ -670,7 +884,7 @@ def render(signals, evals, req, title=None):
   <h2>How this was scored</h2>
   <div class="method">
     <div class="panel"><h4>Fit score weights</h4><table class="weights"><tbody>{wrows}</tbody></table>
-      <p class="small muted">Each dimension is scored 1 to 5 with anchors from the rubric, then weighted to 0-100. Advance at {thresholds["advance"]}+ with no must-have missed; Consider at {thresholds["consider"]}+ with at most one missed. A 4 or 5 with no verifiable quote counts as 3.</p></div>
+      <p class="small muted">Each dimension is scored 1 to 5 with anchors from the rubric, then weighted to 0-100. Advance at <span id="th-adv">{thresholds["advance"]}</span>+ with no must-have missed; Consider at <span id="th-con">{thresholds["consider"]}</span>+ with at most one missed. A 4 or 5 with no verifiable quote counts as 3.</p></div>
     <div class="panel"><h4>Integrity tiers</h4><ul>
       <li><b>High risk:</b> any strong signal (hidden AI instruction, contact details or resume text shared with another applicant, impossible dates, several overlapping full-time jobs) or 3+ moderate. Verify identity before any interview.</li>
       <li><b>Verify:</b> any moderate signal or 3+ weak ones. Proceed, and check the specific item.</li>
@@ -723,6 +937,10 @@ def selftest():
     out_csv = to_csv(rows)
     check("'=HYPERLINK" in out_csv and "\n=HYPERLINK" not in out_csv, "CSV neutralizes formulas from application text")
     check("</script><script>" not in out.split('id="cs-data">')[1].split("</script>")[0] + "x", "embedded data cannot close its script tag")
+    md = summary_md(sig, ev, req)
+    check("| 1 | **A** |" in md and "\u2588" in md and "Verify first" in md, "chat summary ranks with score bars")
+    check("| R1 | yes | Kubernetes |" in requirements_md(req), "chat requirements table lists must-haves")
+    check('id="tune"' in out and '"orig"' in out, "report carries the live tuning panel and its data")
     print("all passed" if ok else "FAILURES")
     return 0 if ok else 1
 
@@ -730,6 +948,9 @@ def selftest():
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "selftest":
         sys.exit(selftest())
+    if len(sys.argv) > 2 and sys.argv[1] == "requirements-md":
+        print(requirements_md(json.loads(Path(sys.argv[2]).read_text())))
+        return
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--signals", required=True)
     ap.add_argument("--evals", required=True)
@@ -739,6 +960,7 @@ def main():
     ap.add_argument("--json", help="also write the computed scores here")
     ap.add_argument("--csv", help="also write the shortlist as CSV here")
     ap.add_argument("--pdf", help="also print the report to PDF here (needs Chrome, Chromium, Edge, or Brave)")
+    ap.add_argument("--markdown", help="also write a chat-ready results summary (ranked table with score bars) here")
     a = ap.parse_args()
     signals = json.loads(Path(a.signals).read_text())
     evals = json.loads(Path(a.evals).read_text())
@@ -748,9 +970,18 @@ def main():
     if a.csv:
         Path(a.csv).write_text("\ufeff" + to_csv(csv_rows(compute(signals, evals, req)[0])))
         print(f"csv -> {a.csv}")
+    pdf_ok = False
     if a.pdf:
-        ok, msg = make_pdf(a.out, a.pdf)
-        print(f"pdf -> {msg}" if ok else msg)
+        pdf_ok, msg = make_pdf(a.out, a.pdf)
+        print(f"pdf -> {msg}" if pdf_ok else msg)
+    if a.markdown:
+        files = {"Report (interactive)": str(Path(a.out).resolve())}
+        if pdf_ok:
+            files["PDF"] = str(Path(a.pdf).resolve())
+        if a.csv:
+            files["Shortlist CSV"] = str(Path(a.csv).resolve())
+        Path(a.markdown).write_text(summary_md(signals, evals, req, files) + "\n")
+        print(f"markdown -> {a.markdown}")
     if a.json:
         reqs = req.get("requirements", [])
         weights = {**DEFAULT_WEIGHTS, **req.get("weights", {})}

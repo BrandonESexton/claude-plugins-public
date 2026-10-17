@@ -53,7 +53,7 @@
     {
       "name": "candidate-screen",
       "source": "./plugins/candidate-screen",
-      "description": "Screens a stack of job applications against a posting in a local browser app: approve the requirements, tune the weights, get evidence-verified fit and learning-agility scores, catch fake and AI-gamed applications, and export a ranked PDF, HTML, or CSV report with interview questions."
+      "description": "Screens a stack of job applications against a posting: approve the requirements, tune the weights, get evidence-verified fit and learning-agility scores, catch fake and AI-gamed applications, and export a ranked report that retunes itself live and compares candidates side by side. Browser app in Claude Code, chat mode in Cowork."
     }
   ]
 }

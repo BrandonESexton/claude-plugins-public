@@ -31,6 +31,7 @@ career.md            what you have done, with numbers
 preferences.md       what you want, pay, dealbreakers, boards
 tracker.csv          every job you looked at or applied to (managed by scripts/tracker.py)
 scans/               one report per scan
+inbox/               job-alert emails you drop in for the next scan
 applications/        one folder per application (resume, cover letter, notes)
 ```
 
@@ -45,5 +46,5 @@ python3 -m unittest discover -s tests
 - The tracker script needs Python 3 in Cowork's environment. If it is not there, the plugin silently falls back to a plain list. Untested in Cowork so far.
 
 - It never submits an application or sends a message. You do.
-- Scans use whatever web or browser tool Claude has in your setup. If it cannot open a job board that needs a login, it says so and falls back to web search.
+- Scans read employers' public job feeds (Greenhouse, Lever, Ashby) first, which need no login. LinkedIn and Indeed are used only as leads, because they block automated reading. For those two, the most reliable route is job-alert emails saved or pasted into `job-search/inbox/` before a scan; Indeed postings are rated from the employer's own page when one can be found. Employers on other systems (Workday and similar) are found through search and opened by hand. If a posting cannot be opened it is listed as unverified, not rated.
 - Pay research is a market estimate from public postings, not a promise.

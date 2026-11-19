@@ -1,0 +1,10 @@
+{
+  "name": "job-hunter",
+  "version": "0.5.0",
+  "description": "Guided job search for any field. Onboards from your resume and an interview, builds your career file and job preferences (role, pay, location, dealbreakers), re-interviews you to keep the career file sharp, rewrites your resume as an expert and saves a reusable template, scans employer job feeds and the boards you are signed in to, reviews postings with honest fit and knock-out checks, and builds a tailored resume as a real .docx and PDF, checked for copied text and untraceable claims, with a tracker.",
+  "author": {
+    "name": "Brandon Sexton",
+    "email": "bsexton@pm.me"
+  },
+  "license": "MIT"
+}

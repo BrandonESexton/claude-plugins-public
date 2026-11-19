@@ -56,9 +56,9 @@
       "description": "Screens a stack of job applications against a posting: approve the requirements, tune the weights, get evidence-verified fit and learning-agility scores, catch fake and AI-gamed applications, and export a ranked report that retunes itself live and compares candidates side by side. Browser app in Claude Code, chat mode in Cowork."
     },
     {
-      "name": "job-search-starter",
-      "source": "./plugins/job-search-starter",
-      "description": "Guided job search for any field. Onboards from a resume and interview (role, pay, location, dealbreakers), scans job boards, reviews postings with honest fit feedback, and builds a tailored resume and cover letter. You submit every application yourself. Works in Cowork."
+      "name": "job-hunter",
+      "source": "./plugins/job-hunter",
+      "description": "Guided job search for any field. Onboards from a resume and interview (role, pay, location, dealbreakers), re-interviews to keep your career file sharp, rewrites your resume as an expert and saves a reusable template, scans employer job feeds and the boards you are signed in to, reviews postings with honest fit and knock-out checks, and builds a tailored resume as a real .docx and PDF, checked for copied text and untraceable claims. You submit every application yourself. Works in Cowork."
     }
   ]
 }

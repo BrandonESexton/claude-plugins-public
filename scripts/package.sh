@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Builds one zip per plugin and one zip per skill into dist/.
 #   dist/<plugin>.zip          whole plugin, .claude-plugin/ at the archive root (Claude Cowork upload)
+#   downloads/<plugin>.zip     refreshed copy for plugins that ship a direct download link (create it once to opt in)
 #   dist/skill-<skill>.zip     one skill folder with SKILL.md at its top (ChatGPT or other skill uploads)
 # Usage: scripts/package.sh [plugin-name ...]   (default: every plugin)
 set -euo pipefail
@@ -12,6 +13,8 @@ for p in "${plugins[@]}"; do
   [ -d "plugins/$p" ] || { echo "no such plugin: $p" >&2; exit 1; }
   (cd "plugins/$p" && zip -qr "../../dist/$p.zip" . -x '*.DS_Store' '*/__pycache__/*' '*.pyc')
   echo "dist/$p.zip"
+  # downloads/ holds the zips linked from READMEs (tracked in git); refresh any that exist
+  [ -f "downloads/$p.zip" ] && cp "dist/$p.zip" "downloads/$p.zip" && echo "downloads/$p.zip"
   for s in plugins/$p/skills/*/; do
     [ -f "$s/SKILL.md" ] || continue
     n=$(basename "$s")

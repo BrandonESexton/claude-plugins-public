@@ -50,14 +50,22 @@ Any version from 3.8 up prints something like `Python 3.12.4` and is fine.
 
 ## Install
 
-### Claude Cowork (Windows or Mac)
+Pick one of three ways. All three install the same plugin.
 
-1. Download **[job-hunter.zip](https://github.com/BrandonESexton/claude-plugins-public/releases/latest/download/job-hunter.zip)** from the latest release. (Or zip the `plugins/job-hunter` folder yourself so `.claude-plugin/` sits at the top of the zip.)
+| Method | Best for | Updates |
+| --- | --- | --- |
+| [A. Claude Cowork](#a-claude-cowork-windows-or-mac) | Most people. No terminal needed. | Upload the new zip. |
+| [B. Claude Code marketplace](#b-claude-code-marketplace-windows-mac-or-linux) | Claude Code users. | One command. |
+| [C. Download the zip](#c-download-the-zip-optional) | No marketplace access, offline machines, or trying it once. | Download again. |
+
+### A. Claude Cowork (Windows or Mac)
+
+1. Download **[job-hunter.zip](https://github.com/BrandonESexton/claude-plugins-public/raw/main/downloads/job-hunter.zip)**. Do not unzip it.
 2. In Cowork, open the plugins settings, upload the zip, and accept it.
 3. Create an empty folder for your search, for example `Documents/Job Search`, and pick it when Cowork asks which folder to work in.
 4. Type `/job-hunter:setup`, or just say "help me find a job".
 
-### Claude Code (Windows, Mac, or Linux)
+### B. Claude Code marketplace (Windows, Mac, or Linux)
 
 ```
 /plugin marketplace add BrandonESexton/claude-plugins-public
@@ -66,13 +74,26 @@ Any version from 3.8 up prints something like `Python 3.12.4` and is fine.
 
 Then open Claude Code in an empty folder for your search and run `/job-hunter:setup`. On Windows, Claude Code works from PowerShell or Git Bash; the plugin handles both.
 
-To try it for one session without installing, download the zip, unzip it, and run `claude --plugin-dir ./job-hunter`.
+### C. Download the zip (optional)
+
+The same **[job-hunter.zip](https://github.com/BrandonESexton/claude-plugins-public/raw/main/downloads/job-hunter.zip)** works without the marketplace. It is rebuilt from this folder each time the plugin changes; each [release](https://github.com/BrandonESexton/claude-plugins-public/releases/latest) also carries a copy.
+
+- **Cowork:** upload it as in A.
+- **Claude Code:** unzip it into a folder you keep, for example `Documents/claude-plugins/job-hunter` (Windows: right-click the zip, **Extract All**; Mac: double-click it; Linux: `unzip job-hunter.zip -d job-hunter`). Then start Claude Code from your job search folder with:
+
+  ```
+  claude --plugin-dir "<path to>/job-hunter"
+  ```
+
+  This loads the plugin for that session only, so start Claude Code the same way each time. For a permanent install, use B.
+
+Check the unzipped folder has `.claude-plugin/plugin.json` at its top. If it shows up one folder deeper (`job-hunter/job-hunter/...`), point `--plugin-dir` at the inner folder.
 
 Install the whole plugin, not single skills: the skills share `RULES.md` and the scripts.
 
 ### Updating
 
-Claude Code: `/plugin marketplace update claude-plugins-public`. Cowork: upload the new zip. Your `job-search/` folder is never touched by an update.
+Claude Code marketplace: `/plugin marketplace update claude-plugins-public`. Cowork or zip: download the new zip and upload or unzip it over the old one. Your `job-search/` folder is never touched by an update.
 
 ## Skills
 
@@ -148,5 +169,7 @@ Scripts are Python 3.8+ standard library only and run the same on Windows, Mac, 
 python -m unittest discover -s tests      # use py or python3 if that is your command
 claude plugin eval .                      # evals/: hidden instruction, staffing agency, years knock-out
 ```
+
+After changing anything in this folder, rebuild the download with `scripts/package.sh job-hunter` from the repo root and commit `downloads/job-hunter.zip` with the change, so the README link never serves an old version.
 
 Eval cases use a fictional electrician. Edit `evals/_fixture/` and run `evals/sync_fixture.sh` to update the copy each case carries.

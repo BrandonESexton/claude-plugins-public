@@ -51,7 +51,9 @@ Every release has one zip per plugin and one per skill. The links below always p
 - Claude Code, one session only: unzip it and run `claude --plugin-dir ./<plugin>`.
 - ChatGPT or other skill uploads (or the install steps in the plugin README): use `skill-<skill>.zip`, for example [skill-career-interview.zip](https://github.com/BrandonESexton/claude-plugins-public/releases/latest/download/skill-career-interview.zip).
 
-Build the zips yourself with `scripts/package.sh [plugin ...]` (output goes to `dist/`). Pushing a `v*` tag runs the release workflow, which builds and attaches them.
+job-hunter also has a direct download kept in the repo: [downloads/job-hunter.zip](downloads/job-hunter.zip).
+
+Build the zips yourself with `scripts/package.sh [plugin ...]` (output goes to `dist/`; any plugin with a zip in `downloads/` gets that copy refreshed too, so commit it with the change). Pushing a `v*` tag runs the release workflow, which builds and attaches them.
 
 ## Configuration
 
